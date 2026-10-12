@@ -1,0 +1,563 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>HardwareX - Crear solicitud</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1e293b;
+        }
+
+        .contenedor {
+            width: 100%;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 32px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.08);
+        }
+
+        .pasos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .paso {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #eef3f9;
+            padding: 16px;
+            border-radius: 18px;
+        }
+
+        .numero {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #23459c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .paso strong {
+            display: block;
+            font-size: 16px;
+        }
+
+        .paso span {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .barra {
+            width: 100%;
+            height: 9px;
+            background: #dce4ef;
+            border-radius: 20px;
+            margin: 25px 0;
+        }
+
+        .texto {
+            color: #64748b;
+            margin-bottom: 28px;
+        }
+
+        .campo {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        select,
+        input {
+            width: 100%;
+            height: 52px;
+            border: 1px solid #cbd5e1;
+            border-radius: 17px;
+            padding: 0 16px;
+            font-size: 16px;
+            background: #f8fafc;
+            outline: none;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #2860ff;
+            box-shadow: 0 0 0 3px rgba(40,96,255,.12);
+        }
+
+        input[readonly] {
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        .boton {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 35px;
+        }
+
+        button {
+            border: none;
+            background: #2451d8;
+            color: white;
+            padding: 13px 25px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d43b5;
+        }
+
+        .error {
+            color: #dc2626;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .cargando {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <div class="card">
+
+        <div class="pasos">
+
+            <div class="paso">
+                <div class="numero">2</div>
+
+                <div>
+                    <strong>Daño</strong>
+                    <span>Describe el problema</span>
+                </div>
+            </div>
+
+            <div class="paso">
+                <div class="numero">3</div>
+
+                <div>
+                    <strong>Confirmar</strong>
+                    <span>Revisa y envía</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="barra"></div>
+
+        <p class="texto">
+            El progreso se actualiza mientras completas los campos del paso actual.
+        </p>
+
+
+        <!-- EQUIPO -->
+
+        <div class="campo">
+
+            <label for="equipo">
+                Equipo
+            </label>
+
+            <select id="equipo">
+
+                <option value="">
+                    Selecciona tu equipo...
+                </option>
+
+            </select>
+
+            <div
+                id="mensaje-error"
+                class="error"
+            ></div>
+
+            <div
+                id="cargando"
+                class="cargando"
+            >
+                Cargando equipos...
+            </div>
+
+        </div>
+
+
+        <!-- UBICACIÓN -->
+
+        <div class="campo">
+
+            <label for="ubicacion">
+                Ubicación
+            </label>
+
+            <input
+                type="text"
+                id="ubicacion"
+                placeholder="Se mostrará automáticamente"
+                readonly
+            >
+
+        </div>
+
+
+        <!-- TIPO -->
+
+        <div class="campo">
+
+            <label for="tipo_equipo">
+                Tipo de equipo
+            </label>
+
+            <input
+                type="text"
+                id="tipo_equipo"
+                placeholder="Se mostrará automáticamente"
+                readonly
+            >
+
+        </div>
+
+
+        <!-- CÓDIGO -->
+
+        <div class="campo">
+
+            <label for="codigo_equipo">
+                Código del equipo
+            </label>
+
+            <input
+                type="text"
+                id="codigo_equipo"
+                placeholder="Se mostrará automáticamente"
+                readonly
+            >
+
+        </div>
+
+
+        <div class="boton">
+
+            <button
+                type="button"
+                id="btn-siguiente"
+            >
+                Siguiente
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const equipoSelect =
+        document.getElementById("equipo");
+
+    const ubicacionInput =
+        document.getElementById("ubicacion");
+
+    const tipoEquipoInput =
+        document.getElementById("tipo_equipo");
+
+    const codigoEquipoInput =
+        document.getElementById("codigo_equipo");
+
+    const mensajeError =
+        document.getElementById("mensaje-error");
+
+    const cargando =
+        document.getElementById("cargando");
+
+    const botonSiguiente =
+        document.getElementById("btn-siguiente");
+
+
+    let equipos = [];
+
+
+    // =====================================================
+    // CARGAR EQUIPOS DESDE DJANGO
+    // =====================================================
+
+    async function cargarEquipos() {
+
+        cargando.style.display = "block";
+
+        mensajeError.style.display = "none";
+
+        try {
+
+            const respuesta =
+                await fetch("/equipos/api/");
+
+
+            if (!respuesta.ok) {
+
+                throw new Error(
+                    "Error HTTP: " + respuesta.status
+                );
+
+            }
+
+
+            equipos =
+                await respuesta.json();
+
+
+            equipoSelect.innerHTML = "";
+
+
+            const opcionInicial =
+                document.createElement("option");
+
+            opcionInicial.value = "";
+
+            opcionInicial.textContent =
+                "Selecciona tu equipo...";
+
+            equipoSelect.appendChild(
+                opcionInicial
+            );
+
+
+            equipos.forEach(function (equipo) {
+
+                const opcion =
+                    document.createElement("option");
+
+                opcion.value =
+                    equipo.id_equipo;
+
+                opcion.textContent =
+                    equipo.codigo;
+
+                equipoSelect.appendChild(
+                    opcion
+                );
+
+            });
+
+
+            cargando.textContent =
+                equipos.length +
+                " equipos disponibles";
+
+
+            console.log(
+                "Equipos cargados:",
+                equipos
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error cargando equipos:",
+                error
+            );
+
+
+            cargando.style.display =
+                "none";
+
+
+            mensajeError.textContent =
+                "No se pudieron cargar los equipos. " +
+                "Verifica que Django y PostgreSQL estén funcionando.";
+
+            mensajeError.style.display =
+                "block";
+
+        }
+
+    }
+
+
+    // =====================================================
+    // CUANDO SE SELECCIONA UN EQUIPO
+    // =====================================================
+
+    equipoSelect.addEventListener(
+        "change",
+        function () {
+
+            const idSeleccionado =
+                this.value;
+
+
+            if (!idSeleccionado) {
+
+                ubicacionInput.value = "";
+
+                tipoEquipoInput.value = "";
+
+                codigoEquipoInput.value = "";
+
+                return;
+
+            }
+
+
+            const equipoEncontrado =
+                equipos.find(function (equipo) {
+
+                    return String(
+                        equipo.id_equipo
+                    ) === String(
+                        idSeleccionado
+                    );
+
+                });
+
+
+            if (!equipoEncontrado) {
+
+                console.error(
+                    "Equipo no encontrado"
+                );
+
+                return;
+
+            }
+
+
+            // UBICACIÓN
+
+            ubicacionInput.value =
+                equipoEncontrado.ubicacion ||
+                "Sin ubicación";
+
+
+            // TIPO
+
+            tipoEquipoInput.value =
+                equipoEncontrado.tipo_equipo ||
+                "Sin tipo";
+
+
+            // CÓDIGO
+
+            codigoEquipoInput.value =
+                equipoEncontrado.codigo ||
+                "";
+
+        }
+    );
+
+
+    // =====================================================
+    // BOTÓN SIGUIENTE
+    // =====================================================
+
+    botonSiguiente.addEventListener(
+        "click",
+        function () {
+
+            if (!equipoSelect.value) {
+
+                alert(
+                    "Debes seleccionar un equipo."
+                );
+
+                equipoSelect.focus();
+
+                return;
+
+            }
+
+
+            console.log(
+                "Equipo seleccionado:",
+                equipoSelect.value
+            );
+
+            console.log(
+                "Ubicación:",
+                ubicacionInput.value
+            );
+
+            console.log(
+                "Tipo:",
+                tipoEquipoInput.value
+            );
+
+            console.log(
+                "Código:",
+                codigoEquipoInput.value
+            );
+
+
+            alert(
+                "Equipo seleccionado correctamente."
+            );
+
+        }
+    );
+
+
+    // =====================================================
+    // INICIAR
+    // =====================================================
+
+    cargarEquipos();
+
+});
+
+</script>
+
+</body>
+
+</html>

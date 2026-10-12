@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Perfil técnico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tecnico.css' %}">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-panel">
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow">Panel técnico</p>
+                    <h1>Mi perfil</h1>
+                    <p>Actualiza tus datos personales y revisa tus reportes y historial.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">TC</div>
+                    <div class="user-details">
+                        <span class="name">Técnico</span>
+                        <span class="role">Soporte</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="wizard-card">
+                <div class="wizard-header">
+                    <button type="button" class="wizard-btn btn secondary active" data-target="1">Perfil</button>
+                    <button type="button" class="wizard-btn btn secondary" data-target="2">Historial</button>
+                    <button type="button" class="wizard-btn btn secondary" data-target="3">Reportes</button>
+                </div>
+
+                <form novalidate>
+                    <div class="step-panel active" data-step="1">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="display-name">Nombre</label>
+                                <input type="text" id="display-name" value="Técnico de soporte" required>
+                                <!-- Aquí se conectará la base de datos con el nombre del técnico -->
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Correo</label>
+                                <input type="email" id="email" value="tecnico@hardwarex.com" required>
+                                <!-- Aquí se conectará la base de datos con el correo -->
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Teléfono</label>
+                                <input type="text" id="phone" value="300 123 4567">
+                                <!-- Aquí se conectará la base de datos con el número telefónico -->
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Rol</label>
+                                <input type="text" id="role" value="Soporte técnico" required>
+                                <!-- Aquí se conectará la base de datos con el rol -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-panel" data-step="2">
+                        <div class="list-card">
+                            <div class="list-row list-row-head">
+                                <span>Equipo</span>
+                                <span>Estado</span>
+                                <span>Fecha</span>
+                            </div>
+
+                            <div class="list-row">
+                                <span>Laptop Dell XPS</span>
+                                <span><span class="status-badge done">Arreglado</span></span>
+                                <span>06/08/2026</span>
+                            </div>
+
+                            <div class="list-row">
+                                <span>Impresora Canon</span>
+                                <span><span class="status-badge done">Arreglado</span></span>
+                                <span>05/08/2026</span>
+                            </div>
+
+                            <!-- Aquí se conectará la base de datos con el historial de equipos reparados -->
+                        </div>
+                    </div>
+
+                    <div class="step-panel" data-step="3">
+                        <div class="stats-grid">
+                            <article class="stat-card">
+                                <h3>Equipos atendidos</h3>
+                                <p class="stat-value">34</p>
+                                <!-- Aquí se conectará la base de datos con los equipos atendidos -->
+                            </article>
+                            <article class="stat-card">
+                                <h3>Promedio de cierre</h3>
+                                <p class="stat-value">2.4h</p>
+                                <!-- Aquí se conectará la base de datos con el promedio de cierre -->
+                            </article>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <div>
+                <div class="logo-area">
+                    <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image">
+                    <span>Hardwarex</span>
+                </div>
+                <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
+                    Gestión técnica y seguimiento de equipos.
+                </p>
+            </div>
+
+            <nav class="menu">
+                <a href="{% url 'tecnico' %}" class="menu-item"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="{% url 'solicitudes' %}" class="menu-item"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
+                <a href="{% url 'mantenimientos' %}" class="menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
+                <a href="{% url 'reportes' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'perfil_tecnico' %}" class="menu-item active"><i class="fa-solid fa-user"></i> Mi perfil</a>
+            </nav>
+
+            <div class="logout-area">
+                <a href="{% url 'login' %}" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+            </div>
+        </aside>
+    </div>
+
+    <script src="{% static 'js/tecnico.js' %}"></script>
+</body>
+</html>

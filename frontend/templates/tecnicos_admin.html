@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Técnicos</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+</head>
+<body>
+    <div class="admin-page">
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image-small">
+                <span>Hardwarex</span>
+            </div>
+            <nav class="admin-top-menu">
+                <a href="{% url 'admin_home' %}">Dashboard</a>
+                <a href="{% url 'reportes_recientes' %}">Reportes recientes</a>
+                <a href="{% url 'tecnicos_admin' %}" class="active">Técnicos</a>
+                <a href="{% url 'historial_admin' %}">Historial</a>
+                <a href="{% url 'equipos_admin' %}">Equipos</a>
+                <a href="{% url 'piezas' %}">Piezas</a>
+                <a href="{% url 'asignaciones' %}">Asignaciones</a>
+            </nav>
+            <a href="{% url 'login' %}" class="btn admin-logout">Cerrar sesión</a>
+        </header>
+
+        <main class="admin-main">
+            <section class="page-header admin-header-block">
+                <div>
+                    <p class="eyebrow">Administrador</p>
+                    <h1>Técnicos</h1>
+                    <p>Consulta el equipo técnico disponible para atender solicitudes.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">AD</div>
+                    <div class="user-details">
+                        <span class="name">Admin</span>
+                        <span class="role">Control</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="wizard-card">
+                <div class="report-grid">
+                    <article class="report-card">
+                        <div class="report-head">
+                            <span class="report-title">Equipo técnico</span>
+                            <span class="badge success">Disponible</span>
+                        </div>
+                        <p class="report-text">Los técnicos registrados se mostrarán aquí cuando se conecte la consulta de usuarios.</p>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,576 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hardwarex - Control de Mantenimiento</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- ========================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ========================= -->
+
+    <aside class="sidebar">
+
+        <div>
+
+            <div class="logo-area">
+                <i class="fa-solid fa-microchip"></i>
+                <span>Hardwarex</span>
+            </div>
+
+            <p style="color:#94a3b8; padding-right:8px; line-height:1.6;">
+                Control de equipos y seguimiento de mantenimientos en una sola vista.
+            </p>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="{% url 'inicio' %}" class="menu-item active">
+                <i class="fa-solid fa-circle-plus"></i>
+                Registrar Daño
+            </a>
+
+            <a href="{% url 'historial' %}" class="menu-item">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Historial
+            </a>
+
+            <a href="{% url 'perfil' %}" class="menu-item">
+                <i class="fa-solid fa-user"></i>
+                Mi Perfil
+            </a>
+
+        </nav>
+
+
+        <div class="logout-area">
+
+            <a href="{% url 'logout' %}" class="menu-item">
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                Cerrar sesión
+
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ========================= -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ========================= -->
+
+    <main class="main-panel">
+
+        <header class="page-header">
+
+            <div>
+
+                <p class="eyebrow"
+                   style="margin:0; color:#64748b; letter-spacing:.05em;
+                          text-transform:uppercase; font-size:.85rem;">
+                    Usuario
+                </p>
+
+                <h1>
+                    Registrar daño del equipo
+                </h1>
+
+                <p>
+                    Completa los datos en tres pasos para enviar tu solicitud al técnico.
+                </p>
+
+            </div>
+
+
+            <div class="user-card">
+
+                <div class="avatar">
+                    JD
+                </div>
+
+                <div class="user-details">
+
+                    <span class="name" id="header-name">
+                        {{ usuario.nombre_usuario }}
+                    </span>
+
+                    <span class="role">
+                        Usuario
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ========================= -->
+        <!-- FORMULARIO -->
+        <!-- ========================= -->
+
+        <section class="wizard-card">
+
+            <div class="wizard-header">
+
+                <div class="wizard-step active" data-step="1">
+
+                    <div class="circle">
+                        1
+                    </div>
+
+                    <div>
+                        <strong>Equipo</strong>
+
+                        <div style="font-size:.85rem; color:#64748b;">
+                            Datos del dispositivo
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="wizard-step" data-step="2">
+
+                    <div class="circle">
+                        2
+                    </div>
+
+                    <div>
+                        <strong>Daño</strong>
+
+                        <div style="font-size:.85rem; color:#64748b;">
+                            Describe el problema
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="wizard-step" data-step="3">
+
+                    <div class="circle">
+                        3
+                    </div>
+
+                    <div>
+                        <strong>Confirmar</strong>
+
+                        <div style="font-size:.85rem; color:#64748b;">
+                            Revisa y envía
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="progress-track">
+
+                <div class="progress-bar"
+                     id="wizard-progress">
+                </div>
+
+            </div>
+
+
+            <p class="wizard-help">
+                El progreso se actualiza mientras completas los campos del paso actual.
+            </p>
+
+
+            <!--
+                IMPORTANTE:
+                El formulario ahora se envía a Django.
+                NO utiliza API.
+            -->
+
+            <form id="repair-form"
+                  method="POST"
+                  action="{% url 'inicio' %}"
+                  enctype="multipart/form-data"
+                  novalidate>
+
+                {% csrf_token %}
+
+
+                <!-- ========================= -->
+                <!-- PASO 1 -->
+                <!-- ========================= -->
+
+                <div class="step-panel active"
+                     data-step="1">
+
+                    <div class="form-row">
+
+
+                        <!-- EQUIPO -->
+
+                        <div class="form-group">
+
+                            <label for="id_equipo">
+                                Equipo
+                            </label>
+
+                            <select id="id_equipo"
+                                    name="id_equipo"
+                                    required>
+
+                                <option value=""
+                                        disabled
+                                        selected>
+
+                                    Selecciona tu equipo...
+
+                                </option>
+
+
+                                {% for equipo in equipos %}
+
+                                    <option
+                                        value="{{ equipo.id_equipo }}"
+                                        data-tipo="{{ equipo.id_tipo_equipo_fk.nombre_tipo }}"
+                                        data-codigo="{{ equipo.codigo }}"
+                                        data-ubicacion="{% if equipo.id_ubicacion_fk %}{{ equipo.id_ubicacion_fk.sede }} - {{ equipo.id_ubicacion_fk.salon }}{% else %}Sin ubicación{% endif %}"
+                                    >
+
+                                        {{ equipo.codigo }}
+                                        -
+                                        {{ equipo.id_tipo_equipo_fk.nombre_tipo }}
+
+                                    </option>
+
+                                {% empty %}
+
+                                    <option disabled>
+                                        No hay equipos registrados
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- UBICACIÓN -->
+
+                        <div class="form-group">
+
+                            <label for="device-location">
+                                Ubicación
+                            </label>
+
+                            <input
+                                type="text"
+                                id="device-location"
+                                readonly
+                                placeholder="Se mostrará automáticamente"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-row">
+
+
+                        <!-- TIPO -->
+
+                        <div class="form-group">
+
+                            <label for="device-type">
+                                Tipo de equipo
+                            </label>
+
+                            <input
+                                type="text"
+                                id="device-type"
+                                readonly
+                                placeholder="Se mostrará automáticamente"
+                            >
+
+                        </div>
+
+
+                        <!-- CÓDIGO -->
+
+                        <div class="form-group">
+
+                            <label for="device-code">
+                                Código del equipo
+                            </label>
+
+                            <input
+                                type="text"
+                                id="device-code"
+                                readonly
+                                placeholder="Se mostrará automáticamente"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ========================= -->
+                <!-- PASO 2 -->
+                <!-- ========================= -->
+
+                <div class="step-panel"
+                     data-step="2">
+
+                    <div class="form-row">
+
+
+                        <!-- TIPO DE DAÑO -->
+
+                        <div class="form-group">
+
+                            <label for="issue-type">
+                                Tipo de daño
+                            </label>
+
+                            <select
+                                id="issue-type"
+                                name="tipo_falla"
+                                required>
+
+                                <option value=""
+                                        disabled
+                                        selected>
+                                    Selecciona una opción...
+                                </option>
+
+                                <option value="hardware">
+                                    Falla de hardware
+                                </option>
+
+                                <option value="software">
+                                    Falla de software
+                                </option>
+
+                                <option value="lentitud">
+                                    Lentitud
+                                </option>
+
+                                <option value="otro">
+                                    Otro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- PRIORIDAD -->
+
+                        <div class="form-group">
+
+                            <label for="urgency">
+                                Urgencia
+                            </label>
+
+                            <select
+                                id="urgency"
+                                name="prioridad"
+                                required>
+
+                                <option value=""
+                                        disabled
+                                        selected>
+                                    Selecciona la prioridad...
+                                </option>
+
+                                <option value="baja">
+                                    Baja
+                                </option>
+
+                                <option value="media">
+                                    Media
+                                </option>
+
+                                <option value="alta">
+                                    Alta
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DESCRIPCIÓN -->
+
+                    <div class="form-group full-width">
+
+                        <label for="description">
+                            Descripción del daño
+                        </label>
+
+                        <textarea
+                            id="description"
+                            name="descripcion"
+                            rows="5"
+                            placeholder="Describe qué está pasando con el equipo"
+                            required></textarea>
+
+                    </div>
+
+
+                    <!-- IMAGEN -->
+
+                    <label class="file-upload"
+                           for="upload-image">
+
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                        <span>
+                            Haz clic para adjuntar una imagen (opcional)
+                        </span>
+
+                        <input
+                            type="file"
+                            id="upload-image"
+                            name="imagen"
+                            accept="image/*"
+                        >
+
+                    </label>
+
+                </div>
+
+
+                <!-- ========================= -->
+                <!-- PASO 3 -->
+                <!-- ========================= -->
+
+                <div class="step-panel"
+                     data-step="3">
+
+                    <div class="summary-card">
+
+                        <div class="summary-item">
+                            <span>Equipo:</span>
+                            <span id="summary-device"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Tipo de equipo:</span>
+                            <span id="summary-type"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Ubicación:</span>
+                            <span id="summary-location"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Tipo de daño:</span>
+                            <span id="summary-issue"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Urgencia:</span>
+                            <span id="summary-urgency"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Descripción:</span>
+                            <span id="summary-description"></span>
+                        </div>
+
+                        <div class="summary-item">
+                            <span>Código:</span>
+                            <span id="summary-serial"></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ERROR -->
+
+                <div class="form-error"
+                     id="form-error">
+                </div>
+
+
+                <!-- BOTONES -->
+
+                <div class="form-actions">
+
+                    <button
+                        type="button"
+                        id="prev-button"
+                        class="btn secondary"
+                        hidden>
+
+                        Anterior
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="next-button"
+                        class="btn primary">
+
+                        Siguiente
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        id="submit-button"
+                        class="btn primary"
+                        hidden>
+
+                        Confirmar
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- JAVASCRIPT SOLO PARA EL WIZARD -->
+
+<script src="{% static 'js/index.js' %}"></script>
+
+</body>
+
+</html>

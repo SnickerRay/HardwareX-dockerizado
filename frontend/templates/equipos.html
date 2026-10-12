@@ -1,0 +1,389 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Hardwarex - Equipos</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="{% static 'css/style.css' %}">
+
+    <link rel="stylesheet"
+          href="{% static 'css/tecnico.css' %}">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- ============================= -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ============================= -->
+
+    <main class="main-panel">
+
+        <header class="page-header">
+
+            <div>
+
+                <p class="eyebrow">
+                    Panel técnico
+                </p>
+
+                <h1>
+                    Equipos registrados
+                </h1>
+
+                <p>
+                    Lista general de los equipos activos en el sistema.
+                </p>
+
+            </div>
+
+
+            <!-- USUARIO -->
+
+            <div class="user-card">
+
+                <div class="avatar">
+                    TC
+                </div>
+
+                <div class="user-details">
+
+                    <span class="name">
+                        Técnico
+                    </span>
+
+                    <span class="role">
+                        Soporte
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ============================= -->
+        <!-- TARJETA DE EQUIPOS -->
+        <!-- ============================= -->
+
+        <section class="wizard-card">
+
+            <div class="wizard-header">
+
+                <div class="wizard-step active">
+
+                    <div class="circle">
+
+                        <i class="fa-solid fa-desktop"></i>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Equipos
+                        </strong>
+
+                        <div style="font-size:.85rem; color:#64748b;">
+                            Inventario
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- INTRODUCCIÓN -->
+
+            <div class="page-intro">
+
+                <p>
+                    Esta vista muestra los equipos registrados
+                    y su estado de seguimiento.
+                </p>
+
+            </div>
+
+
+            <!-- ============================= -->
+            <!-- LISTA DE EQUIPOS -->
+            <!-- ============================= -->
+
+            <div class="list-card">
+
+                <!-- ENCABEZADO -->
+
+                <div class="list-row list-row-head">
+
+                    <span>
+                        Equipo
+                    </span>
+
+                    <span>
+                        Salón
+                    </span>
+
+                    <span>
+                        Código
+                    </span>
+
+                    <span>
+                        Tipo
+                    </span>
+
+                </div>
+
+
+                <!-- EQUIPOS DE LA BASE DE DATOS -->
+
+                {% for equipo in equipos %}
+
+                <div class="list-row">
+
+                    <!-- EQUIPO -->
+
+                    <span>
+
+                        Equipo {{ equipo.id_equipo }}
+
+                    </span>
+
+
+                    <!-- UBICACIÓN -->
+
+                    <span>
+
+                        {% if equipo.id_ubicacion_fk %}
+
+                            {{ equipo.id_ubicacion_fk.salon }}
+
+                        {% else %}
+
+                            Sin ubicación
+
+                        {% endif %}
+
+                    </span>
+
+
+                    <!-- CÓDIGO -->
+
+                    <span>
+
+                        {{ equipo.codigo }}
+
+                    </span>
+
+
+                    <!-- TIPO -->
+
+                    <span>
+
+                        {{ equipo.id_tipo_equipo_fk.nombre_tipo }}
+
+                    </span>
+
+                </div>
+
+                {% empty %}
+
+                <!-- SI NO HAY EQUIPOS -->
+
+                <div class="list-row">
+
+                    <span>
+                        No hay equipos registrados.
+                    </span>
+
+                    <span>
+                        -
+                    </span>
+
+                    <span>
+                        -
+                    </span>
+
+                    <span>
+                        -
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ============================= -->
+    <!-- BARRA LATERAL -->
+    <!-- ============================= -->
+
+    <aside class="sidebar">
+
+        <div>
+
+            <!-- LOGO -->
+
+            <div class="logo-area">
+
+                <img
+                    src="{% static 'img/Logo.png' %}"
+                    alt="Logo Hardwarex"
+                    class="logo-image"
+                >
+
+                <span>
+                    Hardwarex
+                </span>
+
+            </div>
+
+
+            <p style="color:#94a3b8; padding-right:8px; line-height:1.6;">
+
+                Gestión técnica y seguimiento de equipos.
+
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- MENÚ -->
+        <!-- ============================= -->
+
+        <nav class="menu">
+
+            <!-- INICIO -->
+
+            <a
+                href="{% url 'tecnico' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-house"></i>
+
+                Inicio
+
+            </a>
+
+
+            <!-- EQUIPOS -->
+
+            <a
+                href="{% url 'equipos' %}"
+                class="menu-item active"
+            >
+
+                <i class="fa-solid fa-desktop"></i>
+
+                Equipos
+
+            </a>
+
+
+            <!-- SOLICITUDES -->
+
+            <a
+                href="{% url 'solicitudes' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-list-check"></i>
+
+                Solicitudes
+
+            </a>
+
+
+            <!-- MANTENIMIENTOS -->
+
+            <a
+                href="{% url 'mantenimientos' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-screwdriver-wrench"></i>
+
+                Mantenimientos
+
+            </a>
+
+
+            <!-- REPORTES -->
+
+            <a
+                href="{% url 'reportes' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-chart-column"></i>
+
+                Reportes
+
+            </a>
+
+
+            <!-- PERFIL -->
+
+            <a
+                href="{% url 'perfil_tecnico' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-user"></i>
+
+                Mi perfil
+
+            </a>
+
+        </nav>
+
+
+        <!-- ============================= -->
+        <!-- CERRAR SESIÓN -->
+        <!-- ============================= -->
+
+        <div class="logout-area">
+
+            <a
+                href="{% url 'login' %}"
+                class="menu-item"
+            >
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+                Cerrar sesión
+
+            </a>
+
+        </div>
+
+    </aside>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+
+<script src="{% static 'js/tecnico.js' %}"></script>
+
+</body>
+
+</html>

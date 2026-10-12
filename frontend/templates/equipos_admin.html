@@ -1,0 +1,728 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Equipos Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    
+</head>
+<body>
+    <div class="admin-page">
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image-small">
+                <span>Hardwarex</span>
+            </div>
+            <nav class="admin-top-menu">
+                <a href="{% url 'admin_home' %}">Dashboard</a>
+                <a href="{% url 'reportes_recientes' %}">Reportes recientes</a>
+                <a href="{% url 'tecnicos_admin' %}">Técnicos</a>
+                <a href="{% url 'historial_admin' %}">Historial</a>
+                <a href="{% url 'equipos_admin' %}" class="active">Equipos</a>
+                <a href="{% url 'piezas' %}">Piezas</a>
+                <a href="{% url 'asignaciones' %}">Asignaciones</a>
+            </nav>
+            <a href="{% url 'login' %}" class="btn admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+        </header>
+
+        <main class="admin-main">
+            <section class="page-header admin-header-block">
+                <div>
+                    <p class="eyebrow">Administrador</p>
+                    <h1>Equipos registrados</h1>
+                    <p>Inventario de equipos con estado y ubicación.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">AD</div>
+                    <div class="user-details">
+                        <span class="name">Admin</span>
+                        <span class="role">Control</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="wizard-card">
+                <div class="equipment-grid">
+                        {% for equipo in equipos %}
+
+                            <article class="equipment-card">
+                            <div class="equipment-card-content">
+                                <div class="equipment-image">
+                                    <img src="{% static 'img/Logo.png' %}" alt="Equipo">
+                                </div>
+
+                                <div>
+                                        <h3> Código: {{ equipo.codigo }} </h3>
+                                        <p> Tipo: {{ equipo.id_tipo_equipo_fk.nombre_tipo }} </p>
+
+                                    {% if equipo.id_ubicacion_fk %}
+                                        <p> Ubicación: {{ equipo.id_ubicacion_fk.sede }} - {{ equipo.id_ubicacion_fk.salon }} </p>
+
+                                    {% else %}
+                                        <p> Ubicación: Sin asignar </p>
+                                    {% endif %}
+
+                                    <p> Estado: {{ equipo.estado_general }} </p>
+
+                                    <p> Fecha de compra: {{ equipo.fecha_compra|default:"No registrada" }} </p>
+
+                                    <button class="btn secondary" type="button"> Ver más </button>
+                                </div>
+                            </div>
+                            </article>
+
+                            {% empty %}
+
+                                <p> No hay equipos registrados </p>
+
+                            {% endfor %}
+
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+            <!-- botones -->
+            <div class="fab-container">
+                <div class="fab-buttons">
+                    <button type="button" class="fab-action" data-bs-toggle="modal" data-bs-target="#modalAgregarEquipo"> Agregar </button>
+
+                    <div class="modal fade" id="modalAgregarEquipo" tabindex="-1" aria-labelledby="modalAgregarEquipoLabel" aria-hidden="true">
+
+                    <div class="modal-dialog">
+
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+
+                            <h5
+                                class="modal-title"
+                                id="modalAgregarEquipoLabel">
+                                Agregar equipo
+                            </h5>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                            </button>
+
+                            </div>
+
+                <form method="POST">
+
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="agregar">
+
+                    <div class="modal-body">
+
+                        <!-- Código -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="codigo"
+                                class="form-label">
+                                Código del equipo
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="codigo"
+                                name="codigo"
+                                required>
+
+                        </div>
+
+
+                        <!-- Tipo de equipo -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="tipo_equipo"
+                                class="form-label">
+                                Tipo de equipo
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="tipo_equipo"
+                                name="tipo_equipo"
+                                required>
+
+                                <option value="">
+                                    Selecciona un tipo
+                                </option>
+
+                                {% for tipo in tipos_equipo %}
+
+                                    <option value="{{ tipo.id_tipo_equipo }}">
+                                        {{ tipo.nombre_tipo }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Fecha de compra -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="fecha_compra"
+                                class="form-label">
+                                Fecha de compra
+                            </label>
+
+                            <input
+                                type="date"
+                                class="form-control"
+                                id="fecha_compra"
+                                name="fecha_compra">
+
+                        </div>
+
+
+                        <!-- Ubicación -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="ubicacion"
+                                class="form-label">
+                                Ubicación
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="ubicacion"
+                                name="ubicacion">
+
+                                <option value="">
+                                    Sin ubicación
+                                </option>
+
+                                {% for ubicacion in ubicaciones %}
+
+                                    <option value="{{ ubicacion.id_ubicacion }}">
+                                        {{ ubicacion.sede }} - {{ ubicacion.salon }}
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Estado -->
+
+                        <div class="mb-3">
+
+                            <label
+                                for="estado_general"
+                                class="form-label">
+                                Estado
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="estado_general"
+                                name="estado_general">
+
+                                <option value="operativo">
+                                    Operativo
+                                </option>
+
+                                <option value="en_reparacion">
+                                    En reparación
+                                </option>
+
+                                <option value="dado_de_baja">
+                                    Dado de baja
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Botones -->
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+                            Guardar equipo
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+                    </div>
+
+
+                    <button type="button"class="fab-action"data-bs-toggle="modal" data-bs-target="#modalActualizarEquipo"> Actualizar </button>
+
+                    <div class="modal fade" id="modalActualizarEquipo" tabindex="-1" aria-labelledby="modalActualizarEquipoLabel" aria-hidden="true">
+
+                <div class="modal-dialog">
+
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+
+                            <h5
+                                class="modal-title"
+                                id="modalActualizarEquipoLabel">
+                                Actualizar equipo
+                            </h5>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Cerrar">
+                            </button>
+
+                        </div>
+
+
+                        <form method="POST">
+
+                            {% csrf_token %}
+
+                            <!-- Acción -->
+
+                            <input
+                                type="hidden"
+                                name="accion"
+                                value="actualizar">
+
+
+                            <!-- ID del equipo -->
+
+                            <input
+                                type="hidden"
+                                name="id_equipo"
+                                id="actualizar_id_equipo">
+
+
+                            <div class="modal-body">
+
+                                <!-- Seleccionar equipo -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="equipo_actualizar"
+                                        class="form-label">
+                                        Equipo
+                                    </label>
+
+                                    <select
+                                        class="form-select"
+                                        id="equipo_actualizar"
+                                        required>
+
+                                        <option value="">
+                                            Selecciona un equipo
+                                        </option>
+
+                                        {% for equipo in equipos %}
+
+                                            <option value="{{ equipo.id_equipo }}">
+
+                                                {{ equipo.codigo }}
+
+                                            </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- Código -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="actualizar_codigo"
+                                        class="form-label">
+
+                                        Código
+
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="actualizar_codigo"
+                                        name="codigo"
+                                        required>
+
+                                </div>
+
+
+                                <!-- Tipo -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="actualizar_tipo"
+                                        class="form-label">
+
+                                        Tipo de equipo
+
+                                    </label>
+
+                                    <select
+                                        class="form-select"
+                                        id="actualizar_tipo"
+                                        name="tipo_equipo"
+                                        required>
+
+                                        {% for tipo in tipos_equipo %}
+
+                                            <option
+                                                value="{{ tipo.id_tipo_equipo }}">
+
+                                                {{ tipo.nombre_tipo }}
+
+                                            </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- Fecha -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="actualizar_fecha"
+                                        class="form-label">
+
+                                        Fecha de compra
+
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        class="form-control"
+                                        id="actualizar_fecha"
+                                        name="fecha_compra">
+
+                                </div>
+
+
+                                <!-- Ubicación -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="actualizar_ubicacion"
+                                        class="form-label">
+
+                                        Ubicación
+
+                                    </label>
+
+                                    <select
+                                        class="form-select"
+                                        id="actualizar_ubicacion"
+                                        name="ubicacion">
+
+                                        <option value="">
+                                            Sin ubicación
+                                        </option>
+
+                                        {% for ubicacion in ubicaciones %}
+
+                                            <option
+                                                value="{{ ubicacion.id_ubicacion }}">
+
+                                                {{ ubicacion.sede }}
+                                                -
+                                                {{ ubicacion.salon }}
+
+                                            </option>
+
+                                        {% endfor %}
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- Estado -->
+
+                                <div class="mb-3">
+
+                                    <label
+                                        for="actualizar_estado"
+                                        class="form-label">
+
+                                        Estado
+
+                                    </label> 
+                                    
+                                    <select class="form-select" id="actualizar_estado" name="estado_general">
+
+                                        <option value="operativo">
+                                            Operativo
+                                        </option>
+
+                                        <option value="en_reparacion">
+                                            En reparación
+                                        </option>
+
+                                        <option value="dado_de_baja">
+                                            Dado de baja
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="modal-footer">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+
+                                    Cancelar
+
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary">
+
+                                    Actualizar equipo
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+                    </div>
+
+                    <button type="button" class="fab-action" data-bs-toggle="modal" data-bs-target="#modalEliminarEquipo"> Eliminar </button>
+
+                    <div class="modal fade" id="modalEliminarEquipo" tabindex="-1" aria-labelledby="modalEliminarEquipoLabel" aria-hidden="true">
+
+                    <div class="modal-dialog">
+
+                        <div class="modal-content">
+
+                            <!-- HEADER -->
+
+                            <div class="modal-header">
+
+                                <h5 class="modal-title"
+                                    id="modalEliminarEquipoLabel">
+
+                                    Eliminar equipo
+
+                                </h5>
+
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="modal"
+                                        aria-label="Cerrar">
+                                </button>
+
+                            </div>
+
+
+                            <!-- FORMULARIO -->
+
+                            <form method="POST">
+
+                                {% csrf_token %}
+
+                                <!-- Acción -->
+
+                                <input type="hidden" name="accion" value="eliminar">
+
+
+                                <!-- ID del equipo -->
+
+                                <input type="hidden" name="id_equipo" id="eliminar_id_equipo">
+
+
+                                <div class="modal-body">
+
+                                    <p>
+                                        Selecciona el equipo que deseas eliminar.
+                                    </p>
+
+
+                                    <!-- SELECCIONAR EQUIPO -->
+
+                                    <div class="mb-3">
+
+                                        <label for="equipo_eliminar"
+                                            class="form-label">
+
+                                            Equipo
+
+                                        </label>
+
+
+                                        <select
+                                            class="form-select"
+                                            id="equipo_eliminar"
+                                            required>
+
+                                            <option value="">
+                                                Selecciona un equipo
+                                            </option>
+
+                                            {% for equipo in equipos %}
+
+                                                <option value="{{ equipo.id_equipo }}">
+
+                                                    {{ equipo.codigo }}
+
+                                                </option>
+
+                                            {% endfor %}
+
+                                        </select>
+
+                                    </div>
+
+
+                                    <!-- INFORMACIÓN -->
+
+                                    <div id="info-equipo-eliminar"
+                                        class="alert alert-warning d-none">
+
+                                        <strong>Advertencia:</strong>
+
+                                        Este equipo será eliminado
+                                        permanentemente de la base de datos.
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- FOOTER -->
+
+                                <div class="modal-footer">
+
+                                    <button type="button"
+                                            class="btn btn-secondary"
+                                            data-bs-dismiss="modal">
+
+                                        Cancelar
+
+                                    </button>
+
+
+                                    <button type="submit"
+                                            class="btn btn-danger">
+
+                                        Eliminar equipo
+
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+                    
+
+                    <!-- <button class="fab-action" data-action="update">Actualizar</button>
+                    
+                    <button class="fab-action" data-action="delete">Eliminar</button>
+                </div>
+            </div>
+
+            Modal 
+            <div id="modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+                <div class="modal">
+                    <header class="modal-header">
+                        <h2 id="modal-title">Acción</h2>
+                        <button id="modal-close" class="modal-close">&times;</button>
+                    </header>
+                    <div class="modal-body">
+                        <p id="modal-action-desc">¿Qué se va a hacer?</p>
+                        <form id="equipment-form">
+                            <input type="hidden" id="form-action" name="action" value="add">
+                            <div class="form-row">
+                                <label for="modelo">Modelo</label>
+                                <input id="modelo" name="modelo" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="salon">Salón / Ubicación</label>
+                                <input id="salon" name="salon" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="tipo">Tipo de daño</label>
+                                <input id="tipo" name="tipo">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn primary" id="form-submit">Confirmar</button>
+                                <button type="button" class="btn secondary" id="form-cancel">Cancelar</button>
+                            </div>
+                            <p id="form-feedback" class="form-feedback"></p>
+                        </form>
+                    </div>
+                </div>
+            </div> -->
+    
+    
+    {{ equipos_json|json_script:"equipos-data" }}
+    <script src="{% static 'js/admin.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
