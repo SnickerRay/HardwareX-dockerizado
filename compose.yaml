@@ -1,0 +1,11 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: hardwarex-web
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
