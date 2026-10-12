@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -8,7 +9,10 @@ SECRET_KEY = 'django-insecure-b7be&2pnew+#%p*3kr7%w6%k8j6*q^#p)1k+b!&bf1k16&@+c3
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "Localhost,127.0.0.1"
+).split(",")
 
 INSTALLED_APPS = [
 
@@ -67,13 +71,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {    "default": {
+DATABASES = {
+    "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "Hardwarex",
-        "USER": "postgres",
-        "PASSWORD": "Sena1234",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.getenv("DB_NAME", "HardwareXx"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv(
+            "DB_PASSWORD",
+            "c0lombia24"
+        ),
+        "HOST": os.getenv("DB_HOST", "localhost"),
+        "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
 
