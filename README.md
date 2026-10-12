@@ -83,3 +83,13 @@ Este proyecto está bajo la licencia MIT.
 - Juan José Fuentes
 - juanjosefuentes.montecervino@gmail.com
 - GitHub: @Dova68
+
+
+## Acceso por roles (cambio)
+
+El inicio de sesión guarda en la sesión de Django el `id_rol_fk` del usuario autenticado:
+- `1`: redirige a `admin_home` y puede entrar a las vistas administrativas.
+- `2`: redirige a `reportes` y puede crear solicitudes/reportes.
+- `3`: redirige a `tecnico` (se conserva el flujo de técnicos).
+
+Las vistas administrativas validan la sesión y el rol en el servidor; no basta con ocultar enlaces en el frontend. El registro público continúa creando usuarios con rol `2`.
