@@ -14,10 +14,21 @@ from .services import autenticar_usuario, obtener_usuario
 
 class LoginView(APIView):
 
+    @staticmethod
+    def _destino_por_rol(request):
+        rol = request.session.get("usuario_rol")
+        if rol == 1:
+            return redirect("admin_home")
+        if rol == 2:
+            return redirect("reportes")
+        if rol == 3:
+            return redirect("tecnico")
+        return redirect("login")
+
     def get(self, request):
 
         if request.session.get("usuario_id"):
-            return redirect("inicio")
+            return self._destino_por_rol(request)
 
         return render(
             request,
@@ -57,12 +68,14 @@ class LoginView(APIView):
         request.session["usuario_id"] = usuario.id_usuario
         request.session["usuario_nombre"] = usuario.nombre_usuario
         request.session["usuario_email"] = usuario.email
+        # El rol se toma del registro autenticado, nunca del formulario.
+        request.session["usuario_rol"] = usuario.id_rol_fk
 
         request.session.set_expiry(
             60 * 60 * 8
         )
 
-        return redirect("inicio")
+        return self._destino_por_rol(request)
 
 
 # ==========================================

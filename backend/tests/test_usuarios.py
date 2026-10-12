@@ -33,11 +33,12 @@ class TestLoginView(SimpleTestCase):
     def test_login_get_con_sesion_redirige_a_inicio(self):
         request = add_session(self.factory.get("/usuarios/login/"))
         request.session["usuario_id"] = 10
+        request.session["usuario_rol"] = 2
 
         response = LoginView.as_view()(request)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/")
+        self.assertEqual(response.url, "/reportes/")
 
     @patch("apps.usuarios.views.render")
     def test_login_post_sin_datos_muestra_error(self, mock_render):
@@ -87,6 +88,7 @@ class TestLoginView(SimpleTestCase):
         usuario.id_usuario = 7
         usuario.nombre_usuario = "tecnico1"
         usuario.email = "tecnico@example.com"
+        usuario.id_rol_fk = 2
         mock_auth.return_value = usuario
 
         request = add_session(
@@ -102,7 +104,7 @@ class TestLoginView(SimpleTestCase):
         response = LoginView.as_view()(request)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/")
+        self.assertEqual(response.url, "/reportes/")
         self.assertEqual(request.session["usuario_id"], 7)
         self.assertEqual(request.session["usuario_nombre"], "tecnico1")
         self.assertEqual(
