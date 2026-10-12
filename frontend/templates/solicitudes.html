@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Solicitudes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tecnico.css' %}">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-panel">
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow">Panel técnico</p>
+                    <h1>Solicitudes registradas</h1>
+                    <p>Revisa las solicitudes reportadas por los usuarios y su estado.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">TC</div>
+                    <div class="user-details">
+                        <span class="name">Técnico</span>
+                        <span class="role">Soporte</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="wizard-card">
+                <div class="wizard-header">
+                    <div class="wizard-step active">
+                        <div class="circle"><i class="fa-solid fa-list-check"></i></div>
+                        <div>
+                            <strong>Solicitudes</strong>
+                            <div style="font-size:.85rem; color:#64748b;">Pendientes y activas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-intro">
+                    <p>Se muestran los reportes enviados por usuarios con el tipo de daño y el responsable.</p>
+                </div>
+
+                <div class="list-card">
+                    <div class="list-row list-row-head">
+                        <span>Equipo</span>
+                        <span>Usuario</span>
+                        <span>Tipo de daño</span>
+                        <span>Estado</span>
+                    </div>
+
+                    <div class="list-row">
+                        <span>Laptop Dell XPS</span>
+                        <span>Juan Pérez</span>
+                        <span>Falla de hardware</span>
+                        <span><span class="status-badge pending">Pendiente</span></span>
+                    </div>
+
+                    <div class="list-row">
+                        <span>PC de escritorio</span>
+                        <span>María Gómez</span>
+                        <span>Lentitud</span>
+                        <span><span class="status-badge in-progress">En revisión</span></span>
+                    </div>
+
+                    <!-- Aquí se conectará la base de datos para listar las solicitudes -->
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <div>
+                <div class="logo-area">
+                    <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image">
+                    <span>Hardwarex</span>
+                </div>
+                <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
+                    Gestión técnica y seguimiento de equipos.
+                </p>
+            </div>
+
+            <nav class="menu">
+                <a href="{% url 'tecnico' %}" class="menu-item"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="{% url 'solicitudes' %}" class="menu-item active"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
+                <a href="{% url 'mantenimientos' %}" class="menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
+                <a href="{% url 'reportes' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
+            </nav>
+
+            <div class="logout-area">
+                <a href="{% url 'login' %}" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+            </div>
+        </aside>
+    </div>
+
+    <script src="{% static 'js/tecnico.js' %}"></script>
+</body>
+</html>

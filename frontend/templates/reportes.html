@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Reportes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tecnico.css' %}">
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-panel">
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow">Panel técnico</p>
+                    <h1>Reportes técnicos</h1>
+                    <p>Resumen de equipos arreglados, pendientes y rendimiento del técnico.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">TC</div>
+                    <div class="user-details">
+                        <span class="name">Técnico</span>
+                        <span class="role">Soporte</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="wizard-card">
+                <div class="wizard-header">
+                    <div class="wizard-step active">
+                        <div class="circle"><i class="fa-solid fa-chart-column"></i></div>
+                        <div>
+                            <strong>Reportes</strong>
+                            <div style="font-size:.85rem; color:#64748b;">Estadísticas</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-intro">
+                    <p>Se resumen las cifras principales del desempeño técnico y de los equipos atendidos.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <h3>Equipos arreglados</h3>
+                        <p class="stat-value">28</p>
+                        <p class="stat-copy">Total de equipos solucionados correctamente.</p>
+                        <!-- Aquí se conectará la base de datos para calcular los arreglados -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Equipos sin arreglar</h3>
+                        <p class="stat-value">5</p>
+                        <p class="stat-copy">Pendientes de revisión o solución.</p>
+                        <!-- Aquí se conectará la base de datos para calcular los pendientes -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Rendimiento técnico</h3>
+                        <p class="stat-value">92%</p>
+                        <p class="stat-copy">Porcentaje de éxito en mantenimientos realizados.</p>
+                        <!-- Aquí se conectará la base de datos para calcular el rendimiento -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Promedio de cierre</h3>
+                        <p class="stat-value">2.4h</p>
+                        <p class="stat-copy">Tiempo promedio para cerrar solicitudes.</p>
+                        <!-- Aquí se conectará la base de datos para calcular el promedio -->
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <div>
+                <div class="logo-area">
+                    <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image">
+                    <span>Hardwarex</span>
+                </div>
+                <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
+                    Gestión técnica y seguimiento de equipos.
+                </p>
+            </div>
+
+            <nav class="menu">
+                <a href="{% url 'tecnico' %}" class="menu-item"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="{% url 'solicitudes' %}" class="menu-item"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
+                <a href="{% url 'mantenimientos' %}" class="menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
+                <a href="{% url 'reportes' %}" class="menu-item active"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
+            </nav>
+
+            <div class="logout-area">
+                <a href="{% url 'login' %}" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+            </div>
+        </aside>
+    </div>
+
+    <script src="{% static 'js/tecnico.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HardwareX - Login</title>
+
+    <link rel="icon" type="image/png" href="{% static 'img/logo_1.png' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="menu container">
+
+            <a href="{% url 'inicio' %}">
+                <img
+                    src="{% static 'img/Logo.png' %}"
+                    alt="HardwareX"
+                    class="logo"
+                >
+            </a>
+
+            <img
+                src="{% static 'img/escritura_zephyros.png' %}"
+                alt="HardwareX"
+                class="logo-1"
+            >
+
+            <nav class="navbar">
+                <ul>
+                    <li>
+                        <a href="{% url 'inicio' %}">Home</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'equipos' %}">Information</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'equipos' %}">Products</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'login' %}">Login/Register</a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </header>
+
+
+    <div class="containers" id="container">
+
+        <div class="form-container register-container">
+
+            <form
+                id="registerForm"
+                method="POST"
+                action="{% url 'register' %}"
+            >
+
+                {% csrf_token %}
+
+                <h1>REGISTER</h1>
+
+                <input
+                    type="text"
+                    name="nombres"
+                    placeholder="Nombre"
+                    required
+                >
+
+                <input
+                    type="text"
+                    name="apellidos"
+                    placeholder="Apellido"
+                    required
+                >
+
+                <input
+                    type="tel"
+                    name="numero_tel"
+                    placeholder="Número celular"
+                    required
+                >
+
+                <input
+                    type="text"
+                    name="nombre_usuario"
+                    placeholder="Nombre de Usuario"
+                    required
+                >
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    required
+                >
+
+                <input
+                    type="text"
+                    name="fecha_nacimiento"
+                    placeholder="Fecha de Nacimiento"
+                    onfocus="this.type='date'"
+                    onblur="if (!this.value) this.type='text'"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="clave"
+                    placeholder="Contraseña"
+                    required
+                >
+
+                <button type="submit">Register</button>
+
+            </form>
+
+        </div>
+
+
+        <div class="form-container login-container">
+
+            <form
+                id="loginForm"
+                method="POST"
+                action="{% url 'login' %}"
+            >
+
+                {% csrf_token %}
+
+                <h1>LOGIN</h1>
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="clave"
+                    placeholder="Password"
+                    required
+                >
+
+                <div class="content">
+
+                    <div class="pass-link">
+                        <a href="#">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+
+                </div>
+
+                <button type="submit">
+                    Login
+                </button>
+
+                <div class="class-container">
+
+                    <a
+                        href="https://www.facebook.com/coldulcemaria/?locale=es_LA"
+                        class="social"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="lni lni-facebook-square"></i>
+                    </a>
+
+                    <a
+                        href="https://colegiodulcemaria.edu.co/"
+                        class="social"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="lni lni-google"></i>
+                    </a>
+
+                    <a
+                        href="https://www.instagram.com/colegiopedagogicodulcemaria/?hl=es-la"
+                        class="social"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="lni lni-instagram"></i>
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <div class="overlay-container">
+
+            <div class="overlay">
+
+                <div class="overlay-panel overlay-left">
+
+                    <h1 class="title">
+                        HardwareX
+                    </h1>
+
+                    <p>
+                        Mantenimiento de equipos en un instante
+                    </p>
+
+                    <button
+                        type="button"
+                        class="ghost"
+                        id="login"
+                    >
+                        Login
+
+                        <i class="lni lni-arrow-left login"></i>
+                    </button>
+
+                </div>
+
+
+                <div class="overlay-panel overlay-right">
+
+                    <h1 class="title">
+                        Bienvenido
+                        <br>
+                        a
+                        <br>
+                        HardwareX
+                    </h1>
+
+                    <p>
+                        ¿No tienes una cuenta? Dale click aquí
+                    </p>
+
+                    <button
+                        type="button"
+                        class="ghost"
+                        id="register"
+                    >
+                        Registrar
+
+                        <i class="lni lni-arrow-right register"></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="message">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+    <script src="{% static 'js/login.js' %}"></script>
+
+    <script
+        type="module"
+        src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+
+    <script
+        nomodule
+        src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+
+</body>
+
+</html>

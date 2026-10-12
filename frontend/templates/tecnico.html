@@ -1,0 +1,202 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Técnico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .app-shell {
+            grid-template-columns: 1fr 280px;
+        }
+
+        .sidebar {
+            order: 2;
+        }
+
+        .main-panel {
+            order: 1;
+        }
+
+        .logo-image {
+            width: 56px;
+            height: auto;
+            display: block;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 22px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 1rem;
+        }
+
+        .stat-value {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1d4ed8;
+        }
+
+        .stat-copy {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .stat-link {
+            margin-top: auto;
+            align-self: flex-start;
+            text-decoration: none;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 0.8rem;
+            font-weight: 700;
+            width: fit-content;
+        }
+
+        @media (max-width: 960px) {
+            .app-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                order: 1;
+            }
+
+            .main-panel {
+                order: 2;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <main class="main-panel">
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow" style="margin:0; color:#64748b; letter-spacing:.05em; text-transform:uppercase; font-size:.85rem;">Panel</p>
+                    <h1>Bienvenido técnico</h1>
+                    <p>Gestiona equipos, revisa solicitudes y supervisa mantenimientos desde una    MUHAs vista.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">TC</div>
+                    <div class="user-details">
+                        <span class="name">Técnico</span>
+                        <span class="role">Soporte</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="wizard-card">
+                <div class="wizard-header">
+                    <div class="wizard-step active">
+                        <div class="circle"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <div>
+                            <strong>Resumen</strong>
+                            <div style="font-size:.85rem; color:#64748b;">Estado general</div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="wizard-help">Aquí se muestran las estadísticas actuales del panel técnico.</p>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <div class="status-pill"><i class="fa-solid fa-desktop"></i> Activo</div>
+                        <h3>Equipos Asignados</h3>
+                        <p class="stat-value">15</p>
+                        <p class="stat-copy">Equipos pendientes por revisar o atender.</p>
+                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
+                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="status-pill"><i class="fa-solid fa-bell"></i> Pendiente</div>
+                        <h3>Solicitudes Pendientes</h3>
+                        <p class="stat-value">8</p>
+                        <p class="stat-copy">Solicitudes que requieren seguimiento inmediato.</p>
+                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
+                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="status-pill"><i class="fa-solid fa-check"></i> Completado</div>
+                        <h3>Mantenimientos Realizados</h3>
+                        <p class="stat-value">25</p>
+                        <p class="stat-copy">Trabajos cerrados correctamente en el periodo.</p>
+                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
+                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="status-pill"><i class="fa-solid fa-file-lines"></i> Generado</div>
+                        <h3>Reportes Generados</h3>
+                        <p class="stat-value">12</p>
+                        <p class="stat-copy">Reportes emitidos para seguimiento y control.</p>
+                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
+                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                    </article>
+                </div>
+            </section>
+        </main>
+
+        <aside class="sidebar">
+            <div>
+                <div class="logo-area">
+                    <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image">
+                    <span>Hardwarex</span>
+                </div>
+                <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
+                    Panel técnico para atender solicitudes y supervisar procesos.
+                </p>
+            </div>
+
+            <nav class="menu">
+                <a href="{% url 'tecnico' %}" class="menu-item active"><i class="fa-solid fa-house"></i> Inicio</a>
+                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="{% url 'solicitudes' %}" class="menu-item"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
+                <a href="{% url 'mantenimientos' %}" class="menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
+                <a href="{% url 'reportes' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
+            </nav>
+
+            <div class="logout-area">
+                <a href="#" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

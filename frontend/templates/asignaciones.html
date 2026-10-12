@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Asignaciones</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+</head>
+<body>
+    <div class="admin-page">
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image-small">
+                <span>Hardwarex</span>
+            </div>
+            <nav class="admin-top-menu">
+                <a href="{% url 'admin_home' %}">Dashboard</a>
+                <a href="{% url 'reportes_recientes' %}">Reportes recientes</a>
+                <a href="{% url 'tecnicos_admin' %}">Técnicos</a>
+                <a href="{% url 'historial_admin' %}">Historial</a>
+                <a href="{% url 'equipos_admin' %}">Equipos</a>
+                <a href="{% url 'piezas' %}">Piezas</a>
+                <a href="{% url 'asignaciones' %}" class="active">Asignaciones</a>
+            </nav>
+            <a href="{% url 'login' %}" class="btn admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+        </header>
+
+        <main class="admin-main">
+            <section class="page-header admin-header-block">
+                <div>
+                    <p class="eyebrow">Administrador</p>
+                    <h1>Asignaciones</h1>
+                    <p>Reportes ya asociados con el técnico responsable.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">AD</div>
+                    <div class="user-details">
+                        <span class="name">Admin</span>
+                        <span class="role">Control</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="wizard-card">
+                <div class="assignment-list">
+                    <article class="assignment-card">
+                        <div class="assignment-head">
+                            <span>Reporte #00124</span>
+                            <span class="badge success">Asignado</span>
+                        </div>
+                        <p class="report-text">Técnico: Roberto Álvarez</p>
+                        <p class="report-text">Equipo: Laptop Dell XPS</p>
+                        <p class="report-text">Usuario: Juan Pérez</p>
+                        <!-- Conectar con BD: reportes con técnico responsable -->
+                    </article>
+
+                    <article class="assignment-card">
+                        <div class="assignment-head">
+                            <span>Reporte #00125</span>
+                            <span class="badge success">Asignado</span>
+                        </div>
+                        <p class="report-text">Técnico: María Salazar</p>
+                        <p class="report-text">Equipo: PC HP</p>
+                        <p class="report-text">Usuario: María Gómez</p>
+                        <!-- Conectar con BD: asignaciones completadas o activas -->
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/admin.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardwarex - Administrador</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+</head>
+<body>
+    <div class="admin-page">
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image-small">
+                <span>Hardwarex</span>
+            </div>
+            <nav class="admin-top-menu">
+                <a href="{% url 'admin_home' %}" class="active">Dashboard</a>
+                <a href="{% url 'reportes_recientes' %}">Reportes recientes</a>
+                <a href="{% url 'tecnicos_admin' %}">Técnicos</a>
+                <a href="{% url 'historial_admin' %}">Historial</a>
+                <a href="{% url 'equipos_admin' %}">Equipos</a>
+                <a href="{% url 'piezas' %}">Piezas</a>
+                <a href="{% url 'asignaciones' %}">Asignaciones</a>
+            </nav>
+            <a href="{% url 'login' %}" class="btn admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+        </header>
+
+        <main class="admin-main">
+            <section class="page-header admin-header-block">
+                <div>
+                    <p class="eyebrow">Administrador</p>
+                    <h1>Reportes recientes</h1>
+                    <p>Resumen operativo del estado actual de los equipos y las solicitudes.</p>
+                </div>
+                <div class="user-card">
+                    <div class="avatar">AD</div>
+                    <div class="user-details">
+                        <span class="name">Admin</span>
+                        <span class="role">Control</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="wizard-card">
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <h3>Reportes recientes</h3>
+                        <p class="stat-value">{{ total_reportes }}</p>
+                        <p class="stat-copy">Solicitudes reportadas por usuarios y pendientes de asignación.</p>
+                        <a class="btn secondary" href="{% url 'reportes_recientes' %}">Ver detalle</a>
+                        <!-- Conectar con BD: total de reportes recientes -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Equipos dañados</h3>
+                        <p class="stat-value">12</p>
+                        <p class="stat-copy">Equipos con reportes abiertos o en revisión.</p>
+                        <a class="btn secondary" href="{% url 'equipos_admin' %}">Ver detalle</a>
+                        <!-- Conectar con BD: total equipos dañados -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Asignaciones</h3>
+                        <p class="stat-value">9</p>
+                        <p class="stat-copy">Reportes ya asociados con técnico responsable.</p>
+                        <a class="btn secondary" href="{% url 'asignaciones' %}">Ver detalle</a>
+                        <!-- Conectar con BD: total asignaciones activas -->
+                    </article>
+
+                    <article class="stat-card">
+                        <h3>Técnicos activos</h3>
+                        <p class="stat-value">4</p>
+                        <p class="stat-copy">Técnicos disponibles en el sistema.</p>
+                        <a class="btn secondary" href="{% url 'tecnicos_admin' %}">Ver detalle</a>
+                        <!-- Conectar con BD: total técnicos registrados -->
+                    </article>
+                </div>
+
+                <div class="section-block report-list">
+                    <div class="section-title">
+                        <h2>Reportes recientes</h2>
+                        <a class="btn primary" href="{% url 'reportes_recientes' %}">Asignar técnico</a>
+                    </div>
+
+                    <div class="report-grid">
+
+                        {% for solicitud in solicitudes %}
+
+                            <article class="report-card">
+
+                                <div class="report-head">
+
+                                    <span class="report-title">
+                                        {{ solicitud.id_equipo_fk.codigo }}
+                                    </span>
+
+                                    <span class="badge warning">
+                                        {{ solicitud.estado }}
+                                    </span>
+
+                                </div>
+
+                                <p class="report-text">
+                                    Usuario:
+                                    {{ solicitud.id_usuario_fk.nombres }}
+                                    {{ solicitud.id_usuario_fk.apellidos }}
+                                </p>
+
+                                <p class="report-text">
+                                    Equipo:
+                                    {{ solicitud.id_equipo_fk.id_tipo_equipo_fk.nombre_tipo }}
+                                </p>
+
+                                <p class="report-text">
+                                    Prioridad:
+                                    {{ solicitud.prioridad_usuario }}
+                                </p>
+
+                                <p class="report-text">
+                                    Daño:
+                                    {{ solicitud.descripcion }}
+                                </p>
+
+                                <p class="report-text">
+                                    Fecha:
+                                    {{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}
+                                </p>
+
+                                <div class="report-actions">
+
+                                    <a href="#" class="btn primary">
+                                        Asignar a técnico
+                                    </a>
+
+                                </div>
+
+                            </article>
+
+                        {% empty %}
+
+                            <p>No hay solicitudes de reparación registradas.</p>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'js/admin.js' %}"></script>
+</body>
+</html>
