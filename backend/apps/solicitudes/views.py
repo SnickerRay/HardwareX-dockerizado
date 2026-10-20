@@ -1,12 +1,54 @@
+from django.contrib import messages
+from django.shortcuts import redirect
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.views import View
 
+from apps.usuarios.models import Usuario
+from .models import Solicitud
 from .serializers import SolicitudSerializer
 from .services import (
+    asignar_tecnico,
     listar_solicitudes,
     obtener_solicitud,
 )
+
+class AsignarTecnicoFormView(View):
+
+    def post(self, request):
+        if not request.session.get("usuario_id"):
+            return redirect("login")
+
+        destino = (
+            "tecnicos_admin"
+            if request.POST.get("origen") == "tecnicos_admin"
+            else "solicitudes"
+        )
+
+        if request.session.get("usuario_rol") != 1:
+            messages.error(request, "Solo un administrador puede asignar técnicos.")
+            return redirect(destino)
+
+        try:
+            id_solicitud = int(request.POST.get("id_solicitud", ""))
+            id_tecnico = int(request.POST.get("id_tecnico", ""))
+        except ValueError:
+            messages.error(request, "Selecciona una solicitud y un técnico válidos.")
+            return redirect(destino)
+
+        try:
+            asignar_tecnico(id_solicitud, id_tecnico)
+        except Solicitud.DoesNotExist:
+            messages.error(request, "La solicitud ya no está disponible.")
+        except Usuario.DoesNotExist:
+            messages.error(request, "El técnico seleccionado ya no está disponible.")
+        except ValueError as error:
+            messages.error(request, str(error))
+        else:
+            messages.success(request, "El técnico fue asignado correctamente.")
+
+        return redirect(destino)
 
 
 class SolicitudListView(APIView):
