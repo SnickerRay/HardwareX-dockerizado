@@ -1,13 +1,19 @@
 from pathlib import Path
 import re
+from unittest.mock import patch
 
-from django.test import SimpleTestCase
+from django.test import RequestFactory, SimpleTestCase
+from django.urls import reverse
+
+from apps.solicitudes.views import AsignarTecnicoFormView
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-LOGIN_TEMPLATE = BASE_DIR.parent / "frontend" / "templates" / "login.html"
-EQUIPOS_TEMPLATE = BASE_DIR.parent / "frontend" / "templates" / "equipos.html"
-LOGIN_JS = BASE_DIR.parent / "frontend" / "static" / "js" / "login.js"
+LOGIN_TEMPLATE = BASE_DIR / "frontend" / "templates" / "login.html"
+EQUIPOS_TEMPLATE = BASE_DIR / "frontend" / "templates" / "equipos.html"
+TECNICOS_TEMPLATE = BASE_DIR / "frontend" / "templates" / "tecnicos_admin.html"
+HISTORIAL_ADMIN_TEMPLATE = BASE_DIR / "frontend" / "templates" / "historial_admin.html"
+LOGIN_JS = BASE_DIR / "frontend" / "static" / "js" / "login.js"
 
 
 class TestLoginFrontend(SimpleTestCase):
@@ -43,10 +49,16 @@ class TestLoginFrontend(SimpleTestCase):
 
     def test_registro_debe_enviarse_con_submit(self):
         pattern = re.compile(
-            r'<button[^>]*type="submit"[^>]*>\s*Register\s*</button>',
+            r'<button[^>]*type="submit"[^>]*>\s*Registrarse\s*</button>',
             re.IGNORECASE | re.DOTALL,
         )
         self.assertRegex(self.login_html, pattern)
+
+    def test_login_muestra_error_y_control_de_contrasena(self):
+        self.assertIn('id="show-password"', self.login_html)
+        self.assertIn('name="email"', self.login_html)
+        self.assertIn('name="clave"', self.login_html)
+        self.assertIn('role="alert">{{ error }}</p>', self.login_html)
 
 
 class TestEquiposFrontend(SimpleTestCase):
@@ -66,3 +78,50 @@ class TestEquiposFrontend(SimpleTestCase):
 
     def test_template_tiene_estado_vacio(self):
         self.assertIn("No hay equipos registrados.", self.html)
+
+
+class TestAdminTechniciansFrontend(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.technicians_html = TECNICOS_TEMPLATE.read_text(encoding="utf-8")
+        cls.history_html = HISTORIAL_ADMIN_TEMPLATE.read_text(encoding="utf-8")
+
+    def test_tecnicos_admin_usa_datos_reales_y_permita_asignar(self):
+        self.assertIn("{% tecnicos_admin_panel as tecnicos %}", self.technicians_html)
+        self.assertIn("{% solicitudes_asignables as solicitudes %}", self.technicians_html)
+        self.assertIn('name="id_solicitud"', self.technicians_html)
+        self.assertIn('name="id_tecnico"', self.technicians_html)
+        self.assertIn('name="origen" value="tecnicos_admin"', self.technicians_html)
+        self.assertIn("Asignar solicitud", self.technicians_html)
+
+    def test_historial_muestra_asignaciones_reales(self):
+        self.assertIn("{% historial_asignaciones as asignaciones %}", self.history_html)
+        self.assertIn("asignacion.id_solicitud_fk.id_solicitud", self.history_html)
+        self.assertIn("asignacion.id_tecnico_fk.nombres", self.history_html)
+
+    @patch("apps.solicitudes.views.messages.success")
+    @patch("apps.solicitudes.views.asignar_tecnico")
+    def test_asignacion_desde_tecnicos_regresa_al_panel(
+        self,
+        mock_asignar_tecnico,
+        _mock_mensaje,
+    ):
+        request = RequestFactory().post(
+            "/solicitudes-api/asignar-tecnico/",
+            {
+                "id_solicitud": "12",
+                "id_tecnico": "4",
+                "origen": "tecnicos_admin",
+            },
+        )
+        request.session = {"usuario_id": 1, "usuario_rol": 1}
+
+        response = AsignarTecnicoFormView.as_view()(request)
+
+        mock_asignar_tecnico.assert_called_once_with(12, 4)
+        self.assertRedirects(
+            response,
+            reverse("tecnicos_admin"),
+            fetch_redirect_response=False,
+        )

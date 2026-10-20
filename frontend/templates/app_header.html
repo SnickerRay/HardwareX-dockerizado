@@ -1,0 +1,243 @@
+{% load static %}
+<style>
+    :root {
+        color-scheme: dark;
+        --app-bg: #0B1020;
+        --app-panel: #171D35;
+        --app-cyan: #35D9FF;
+        --app-violet: #7965FF;
+        --app-mint: #20E3B2;
+        --app-amber: #FFB454;
+        --app-text: #F3F6FF;
+        --app-muted: #AAB7D4;
+    }
+    body {
+        min-height: 100vh;
+        background:
+            radial-gradient(ellipse at 86% 9%, rgba(121,101,255,.12), transparent 30%),
+            radial-gradient(ellipse at 12% 42%, rgba(53,217,255,.07), transparent 30%),
+            #0B1020;
+        color: var(--app-text);
+    }
+    body::before {
+        position: fixed;
+        z-index: -1;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        opacity: .12;
+        background-image: linear-gradient(rgba(170,183,212,.12) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(170,183,212,.12) 1px, transparent 1px);
+        background-size: 52px 52px;
+        mask-image: linear-gradient(115deg, black, transparent 72%);
+    }
+    .app-nav-shell {
+        position: sticky;
+        z-index: 1000;
+        top: 0;
+        border-bottom: 1px solid rgba(170,183,212,.15);
+        background: rgba(16,22,42,.94);
+        box-shadow: 0 10px 32px rgba(0,0,0,.2);
+        backdrop-filter: blur(18px);
+    }
+    .app-nav-top {
+        display: flex;
+        min-height: 76px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 10px 28px;
+    }
+    .app-nav-brand {
+        display: inline-flex;
+        min-width: 0;
+        align-items: center;
+        gap: 12px;
+        color: var(--app-text);
+        font: 700 1.12rem 'Space Grotesk', 'Segoe UI', sans-serif;
+        text-decoration: none;
+    }
+    .app-nav-brand img {
+        width: 54px;
+        height: 46px;
+        object-fit: contain;
+        mix-blend-mode: screen;
+        filter: drop-shadow(0 0 10px rgba(53,217,255,.3));
+    }
+    .app-nav-brand span { white-space: nowrap; }
+    .app-nav-tools { display: flex; align-items: center; gap: 12px; }
+    .app-nav-user { color: var(--app-muted); font-size: .83rem; }
+    .app-nav-toggle {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border: 1px solid rgba(170,183,212,.25);
+        border-radius: 12px;
+        background: rgba(23,29,53,.82);
+        color: var(--app-text);
+        cursor: pointer;
+    }
+    .app-nav-toggle:hover, .app-nav-toggle:focus-visible {
+        border-color: var(--app-cyan);
+        color: var(--app-cyan);
+    }
+    .app-nav-toggle span, .app-nav-toggle span::before, .app-nav-toggle span::after {
+        display: block;
+        width: 18px;
+        height: 2px;
+        border-radius: 2px;
+        background: currentColor;
+        content: "";
+    }
+    .app-nav-toggle span { position: relative; }
+    .app-nav-toggle span::before { position: absolute; top: -6px; }
+    .app-nav-toggle span::after { position: absolute; top: 6px; }
+    .app-nav-menu {
+        display: flex;
+        max-width: 1600px;
+        align-items: center;
+        gap: 4px;
+        margin: 0 auto;
+        padding: 0 20px;
+        overflow-x: auto;
+        border-top: 1px solid rgba(170,183,212,.1);
+        scrollbar-width: thin;
+    }
+    .app-nav-menu[hidden] { display: none; }
+    .app-nav-menu a {
+        position: relative;
+        display: inline-flex;
+        min-height: 52px;
+        flex: 0 0 auto;
+        align-items: center;
+        padding: 0 14px;
+        color: var(--app-muted);
+        font-size: .84rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color .2s ease, background .2s ease;
+    }
+    .app-nav-menu a:hover, .app-nav-menu a.active {
+        background: rgba(53,217,255,.06);
+        color: var(--app-cyan);
+    }
+    .app-nav-menu a.active::before {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 2px;
+        background: var(--app-cyan);
+        box-shadow: 0 0 12px var(--app-cyan);
+        content: "";
+    }
+    .app-nav-logout { margin-left: auto; color: #FF9A9F !important; }
+    .admin-header, .sidebar { display: none !important; }
+    .app-shell { display: block !important; min-height: 0 !important; gap: 0 !important; padding: 24px !important; }
+    .main-panel { max-width: 1520px; margin: 0 auto; }
+    .admin-page { min-height: 0 !important; background: transparent !important; }
+    .admin-main { max-width: 1568px; margin: 0 auto; padding: 26px 28px !important; }
+    .wizard-card, .card-panel, .page-header, .top-bar {
+        border: 1px solid rgba(170,183,212,.14) !important;
+        background: rgba(23,29,53,.86) !important;
+        color: var(--app-text) !important;
+        box-shadow: 0 20px 55px rgba(0,0,0,.2) !important;
+    }
+    .page-header h1, .page-title, .wizard-card h2, .wizard-card h3,
+    .admin-main h1, .admin-main h2, .admin-main h3 { color: var(--app-text) !important; }
+    .page-header p, .page-copy, .wizard-help, .wizard-card p { color: var(--app-muted); }
+    .eyebrow { color: var(--app-cyan) !important; letter-spacing: .12em; }
+    .user-card, .stat-card, .report-card, .equipment-card, .history-panel, .list-card,
+    .table-card, .assignment-card, .tech-card, .parts-row, .mini-row {
+        border-color: rgba(170,183,212,.15) !important;
+        background-color: rgba(16,22,42,.7) !important;
+        color: var(--app-text) !important;
+    }
+    .user-card .avatar, .avatar { background: linear-gradient(135deg, var(--app-cyan), var(--app-violet)) !important; color: #08101f !important; }
+    .user-details .name, .stat-card h3, .report-title, .equipment-card h3 { color: var(--app-text) !important; }
+    .user-details .role, .stat-copy, .report-text, .equipment-card p, .role-label { color: var(--app-muted) !important; }
+    .wizard-step { border: 1px solid rgba(170,183,212,.12); background: rgba(11,16,32,.45); color: var(--app-muted); }
+    .wizard-step.active { border-color: rgba(53,217,255,.3); background: rgba(53,217,255,.1); color: var(--app-text); }
+    .wizard-step .circle { background: var(--app-cyan); color: #07111f; }
+    .status-pill, .badge.success { background: rgba(32,227,178,.12) !important; color: var(--app-mint) !important; }
+    .badge.warning { background: rgba(255,180,84,.12) !important; color: var(--app-amber) !important; }
+    .btn.primary, .btn.primary:hover { border-color: var(--app-cyan); background: var(--app-cyan); color: #07111f; }
+    .btn.secondary { border: 1px solid rgba(170,183,212,.2); background: rgba(170,183,212,.08); color: var(--app-text); }
+    .btn.secondary:hover { border-color: var(--app-violet); color: #c4bbff; }
+    input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+        border-color: rgba(170,183,212,.2) !important;
+        background-color: rgba(8,13,29,.65) !important;
+        color: var(--app-text) !important;
+    }
+    input::placeholder, textarea::placeholder { color: #74819d !important; }
+    .step-panel, .form-group, .form-row, label { color: var(--app-muted); }
+    .list-row, .table th, .table td { border-color: rgba(170,183,212,.13) !important; color: var(--app-muted); }
+    .list-row-head, .table thead { background: rgba(53,217,255,.08) !important; color: var(--app-cyan) !important; }
+    .progress-track { background: rgba(170,183,212,.12) !important; }
+    .progress-bar { background: linear-gradient(90deg, var(--app-cyan), var(--app-violet)) !important; }
+    .app-nav-shell + * { scroll-margin-top: 150px; }
+    @media (max-width: 700px) {
+        .app-nav-top { min-height: 66px; padding-inline: 15px; }
+        .app-nav-brand img { width: 44px; height: 40px; }
+        .app-nav-brand { font-size: 1rem; }
+        .app-nav-user { display: none; }
+        .app-nav-menu { padding-inline: 8px; }
+        .app-nav-menu a { min-height: 46px; padding-inline: 12px; }
+        .app-shell { padding: 14px !important; }
+        .admin-main { padding: 18px 14px !important; }
+    }
+</style>
+<header class="app-nav-shell">
+    <div class="app-nav-top">
+        <a class="app-nav-brand" href="{% url 'inicio' %}">
+            <img src="{% static 'img/logo png.png' %}" alt="HardwareX">
+            <span>HardwareX</span>
+        </a>
+        <div class="app-nav-tools">
+            {% if request.session.usuario_nombre %}
+            <span class="app-nav-user">{{ request.session.usuario_nombre }}</span>
+            {% endif %}
+            <button class="app-nav-toggle" id="app-nav-toggle" type="button"
+                    aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="app-nav-menu">
+                <span aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+    <nav class="app-nav-menu" id="app-nav-menu" aria-label="Navegación principal" hidden>
+        {% if request.session.usuario_rol == 1 %}
+            <a href="{% url 'admin_home' %}" class="{% if request.resolver_match.url_name == 'admin_home' %}active{% endif %}">Dashboard</a>
+            <a href="{% url 'reportes_recientes' %}" class="{% if request.resolver_match.url_name == 'reportes_recientes' %}active{% endif %}">Reportes</a>
+            <a href="{% url 'solicitudes' %}" class="{% if request.resolver_match.url_name == 'solicitudes' %}active{% endif %}">Solicitudes</a>
+            <a href="{% url 'tecnicos_admin' %}" class="{% if request.resolver_match.url_name == 'tecnicos_admin' %}active{% endif %}">Técnicos</a>
+            <a href="{% url 'historial_admin' %}" class="{% if request.resolver_match.url_name == 'historial_admin' %}active{% endif %}">Historial</a>
+            <a href="{% url 'equipos_admin' %}" class="{% if request.resolver_match.url_name == 'equipos_admin' %}active{% endif %}">Equipos</a>
+            <a href="{% url 'piezas' %}" class="{% if request.resolver_match.url_name == 'piezas' %}active{% endif %}">Piezas</a>
+        {% elif request.session.usuario_rol == 3 %}
+            <a href="{% url 'tecnico' %}" class="{% if request.resolver_match.url_name == 'tecnico' %}active{% endif %}">Inicio</a>
+            <a href="{% url 'equipos' %}" class="{% if request.resolver_match.url_name == 'equipos' %}active{% endif %}">Equipos</a>
+            <a href="{% url 'solicitudes' %}" class="{% if request.resolver_match.url_name == 'solicitudes' %}active{% endif %}">Solicitudes</a>
+            <a href="{% url 'mantenimientos' %}" class="{% if request.resolver_match.url_name == 'mantenimientos' %}active{% endif %}">Mantenimientos</a>
+            <a href="{% url 'reportes' %}" class="{% if request.resolver_match.url_name == 'reportes' %}active{% endif %}">Reportes</a>
+            <a href="{% url 'perfil_tecnico' %}" class="{% if request.resolver_match.url_name == 'perfil_tecnico' %}active{% endif %}">Mi perfil</a>
+        {% else %}
+            <a href="{% url 'inicio' %}" class="{% if request.resolver_match.url_name == 'inicio' %}active{% endif %}">Registrar daño</a>
+            <a href="{% url 'historial' %}" class="{% if request.resolver_match.url_name == 'historial' %}active{% endif %}">Historial</a>
+            <a href="{% url 'perfil' %}" class="{% if request.resolver_match.url_name == 'perfil' %}active{% endif %}">Mi perfil</a>
+        {% endif %}
+        <a class="app-nav-logout" href="{% url 'logout' %}">Cerrar sesión</a>
+    </nav>
+</header>
+<script>
+    (() => {
+        const toggle = document.getElementById("app-nav-toggle");
+        const menu = document.getElementById("app-nav-menu");
+        if (!toggle || !menu) return;
+        toggle.addEventListener("click", () => {
+            const isOpen = toggle.getAttribute("aria-expanded") === "true";
+            toggle.setAttribute("aria-expanded", String(!isOpen));
+            toggle.setAttribute("aria-label", isOpen ? "Abrir menú de navegación" : "Cerrar menú de navegación");
+            menu.hidden = isOpen;
+        });
+    })();
+</script>
