@@ -9,13 +9,14 @@
     <title>Hardwarex - Control de Mantenimiento</title>
 
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <link rel="stylesheet"
-          href="{% static 'css/style.css' %}">
+        href="{% static 'css/style.css' %}">
 </head>
 
 <body>
+{% include "app_header.html" %}
 
 <div class="app-shell">
 
@@ -86,7 +87,7 @@
 
                 <p class="eyebrow"
                    style="margin:0; color:#64748b; letter-spacing:.05em;
-                          text-transform:uppercase; font-size:.85rem;">
+                        text-transform:uppercase; font-size:.85rem;">
                     Usuario
                 </p>
 
@@ -188,7 +189,7 @@
             <div class="progress-track">
 
                 <div class="progress-bar"
-                     id="wizard-progress">
+                    id="wizard-progress">
                 </div>
 
             </div>
@@ -206,10 +207,10 @@
             -->
 
             <form id="repair-form"
-                  method="POST"
-                  action="{% url 'inicio' %}"
-                  enctype="multipart/form-data"
-                  novalidate>
+                method="POST"
+                action="{% url 'inicio' %}"
+                enctype="multipart/form-data"
+                novalidate>
 
                 {% csrf_token %}
 
@@ -219,7 +220,7 @@
                 <!-- ========================= -->
 
                 <div class="step-panel active"
-                     data-step="1">
+                    data-step="1">
 
                     <div class="form-row">
 
@@ -566,8 +567,6 @@
 
 </div>
 
-
-<!-- JAVASCRIPT SOLO PARA EL WIZARD -->
 
 <script src="{% static 'js/index.js' %}"></script>
 

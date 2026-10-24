@@ -1,4 +1,4 @@
-{% load static %}
+{% load static hardwarex_tags %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -10,13 +10,14 @@
     <link rel="stylesheet" href="{% static 'css/tecnico.css' %}">
 </head>
 <body>
+    {% include "app_header.html" %}
     <div class="app-shell">
         <main class="main-panel">
             <header class="page-header">
                 <div>
                     <p class="eyebrow">Panel técnico</p>
                     <h1>Mantenimientos</h1>
-                    <p>Historial de mantenimientos en proceso y finalizados.</p>
+                        <p>Equipos con mantenimientos completados bajo tu responsabilidad.</p>
                 </div>
                 <div class="user-card">
                     <div class="avatar">TC</div>
@@ -27,7 +28,7 @@
                 </div>
             </header>
 
-            <section class="wizard-card">
+            <section class="wizard-card technician-maintenance-page">
                 <div class="wizard-header">
                     <div class="wizard-step active">
                         <div class="circle"><i class="fa-solid fa-screwdriver-wrench"></i></div>
@@ -39,29 +40,34 @@
                 </div>
 
                 <div class="page-intro">
-                    <p>Se registran los mantenimientos realizados y la acción tomada para restaurar el equipo.</p>
+                    <p>El historial muestra la falla reportada, los datos del equipo y la fecha de cierre.</p>
                 </div>
 
-                <div class="list-card">
-                    <div class="list-row list-row-head">
-                        <span>Equipo</span>
-                        <span>Estado</span>
-                        <span>Descripción</span>
-                    </div>
-
-                    <div class="list-row">
-                        <span>Impresora Canon</span>
-                        <span><span class="status-badge done">Finalizado</span></span>
-                        <span>Se reemplazó el cartucho y se calibró el equipo.</span>
-                    </div>
-
-                    <div class="list-row">
-                        <span>Laptop Lenovo</span>
-                        <span><span class="status-badge in-progress">En proceso</span></span>
-                        <span>Se revisa el sistema operativo y el teclado.</span>
-                    </div>
-
-                    <!-- Aquí se conectará la base de datos para listar los mantenimientos -->
+                {% mantenimientos_tecnico as mantenimientos_tecnico_lista %}
+                <div class="technician-maintenance-grid">
+                    {% for mantenimiento in mantenimientos_tecnico_lista %}
+                    <article class="technician-maintenance-card">
+                        {% include "equipment_visual.html" %}
+                        <div class="technician-maintenance-copy">
+                            <div class="technician-maintenance-title">
+                                <div>
+                                    <p class="eyebrow">EQUIPO {{ mantenimiento.id_equipo }}</p>
+                                    <h2>{{ mantenimiento.codigo }}</h2>
+                                </div>
+                                <span class="badge success">Arreglado</span>
+                            </div>
+                            <p><strong>Razón del daño</strong>{{ mantenimiento.motivo_falla }}</p>
+                            <p><strong>Tipo de equipo</strong>{{ mantenimiento.tipo_equipo|default:"No especificado" }}</p>
+                            <p><strong>Ubicación</strong>{% if mantenimiento.salon %}{{ mantenimiento.sede }} · {{ mantenimiento.salon }}{% else %}Sin ubicación{% endif %}</p>
+                            {% if mantenimiento.descripcion_mantenimiento %}
+                            <p><strong>Trabajo realizado</strong>{{ mantenimiento.descripcion_mantenimiento }}</p>
+                            {% endif %}
+                            <p class="technician-completion-date">Mantenimiento completado · {{ mantenimiento.fecha_fin|date:"d/m/Y" }}</p>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <p class="technician-empty-state">Todavía no hay mantenimientos completados para mostrar.</p>
+                    {% endfor %}
                 </div>
             </section>
         </main>
@@ -69,7 +75,7 @@
         <aside class="sidebar">
             <div>
                 <div class="logo-area">
-                    <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image">
+                    <img src="{% static 'img/logo png.png' %}" alt="Logo Hardwarex" class="logo-image">
                     <span>Hardwarex</span>
                 </div>
                 <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
@@ -79,10 +85,10 @@
 
             <nav class="menu">
                 <a href="{% url 'tecnico' %}" class="menu-item"><i class="fa-solid fa-house"></i> Inicio</a>
-                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="/equipos/" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
                 <a href="{% url 'solicitudes' %}" class="menu-item"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
                 <a href="{% url 'mantenimientos' %}" class="menu-item active"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
-                <a href="{% url 'reportes' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'reportes_tecnico' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
                 <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
             </nav>
 

@@ -1,11 +1,17 @@
 from django.urls import path
 
 from .views import (
+    ReporteTecnicoPageView,
     ReporteDetailView,
     ReporteListView,
 )
 
 urlpatterns = [
+    path(
+        "tecnico/",
+        ReporteTecnicoPageView.as_view(),
+        name="reportes_tecnico",
+    ),
     path(
         "",
         ReporteListView.as_view(),
