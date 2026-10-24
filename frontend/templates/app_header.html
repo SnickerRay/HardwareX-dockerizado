@@ -215,10 +215,10 @@
             <a href="{% url 'piezas' %}" class="{% if request.resolver_match.url_name == 'piezas' %}active{% endif %}">Piezas</a>
         {% elif request.session.usuario_rol == 3 %}
             <a href="{% url 'tecnico' %}" class="{% if request.resolver_match.url_name == 'tecnico' %}active{% endif %}">Inicio</a>
-            <a href="{% url 'equipos' %}" class="{% if request.resolver_match.url_name == 'equipos' %}active{% endif %}">Equipos</a>
+            <a href="/equipos/" class="{% if request.resolver_match.url_name == 'equipos' %}active{% endif %}">Equipos</a>
             <a href="{% url 'solicitudes' %}" class="{% if request.resolver_match.url_name == 'solicitudes' %}active{% endif %}">Solicitudes</a>
             <a href="{% url 'mantenimientos' %}" class="{% if request.resolver_match.url_name == 'mantenimientos' %}active{% endif %}">Mantenimientos</a>
-            <a href="{% url 'reportes' %}" class="{% if request.resolver_match.url_name == 'reportes' %}active{% endif %}">Reportes</a>
+            <a href="{% url 'reportes_tecnico' %}" class="{% if request.resolver_match.url_name == 'reportes_tecnico' %}active{% endif %}">Reportes</a>
             <a href="{% url 'perfil_tecnico' %}" class="{% if request.resolver_match.url_name == 'perfil_tecnico' %}active{% endif %}">Mi perfil</a>
         {% else %}
             <a href="{% url 'inicio' %}" class="{% if request.resolver_match.url_name == 'inicio' %}active{% endif %}">Registrar daño</a>
