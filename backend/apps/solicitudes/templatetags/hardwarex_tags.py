@@ -10,6 +10,8 @@ from apps.solicitudes.models import Asignacion, Solicitud
 from apps.solicitudes.services import (
     actividad_solicitudes_por_dia,
     contar_solicitudes_pendientes,
+    listar_equipos_asignados_tecnico,
+    listar_mantenimientos_completados_tecnico,
     listar_solicitudes_pendientes,
     listar_solicitudes_urgentes,
 )
@@ -136,4 +138,57 @@ def historial_asignaciones():
         Asignacion.objects
         .select_related("id_solicitud_fk", "id_tecnico_fk")
         .order_by("-fecha_asignacion", "-id_asignacion")
+    )
+
+
+@register.simple_tag(takes_context=True)
+def dashboard_tecnico(context):
+    tecnico_id = context["request"].session.get("usuario_id")
+    if not tecnico_id:
+        return {
+            "equipos": (),
+            "solicitudes": (),
+            "mantenimientos": (),
+        }
+
+    asignaciones = Asignacion.objects.filter(id_tecnico_fk_id=tecnico_id)
+    return {
+        "equipos": listar_equipos_asignados_tecnico(tecnico_id, limite=3),
+        "solicitudes": (
+            asignaciones
+            .filter(estado_asignacion="asignado")
+            .select_related(
+                "id_solicitud_fk__id_equipo_fk__id_tipo_equipo_fk",
+                "id_solicitud_fk__id_equipo_fk__id_ubicacion_fk",
+            )
+            .order_by("fecha_asignacion", "id_asignacion")[:8]
+        ),
+        "mantenimientos": listar_mantenimientos_completados_tecnico(
+            tecnico_id,
+            limite=3,
+        ),
+    }
+
+
+@register.simple_tag(takes_context=True)
+def equipos_tecnico_asignados(context):
+    tecnico_id = context["request"].session.get("usuario_id")
+    if not tecnico_id:
+        return ()
+    return listar_equipos_asignados_tecnico(tecnico_id)
+
+
+@register.simple_tag(takes_context=True)
+def mantenimientos_tecnico(context):
+    tecnico_id = context["request"].session.get("usuario_id")
+    if not tecnico_id:
+        return ()
+    return listar_mantenimientos_completados_tecnico(tecnico_id)
+
+
+@register.simple_tag
+def equipos_reporte_formulario():
+    return listar_equipos().select_related(
+        "id_tipo_equipo_fk",
+        "id_ubicacion_fk",
     )

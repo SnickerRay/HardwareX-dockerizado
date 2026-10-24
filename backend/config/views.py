@@ -23,7 +23,7 @@ def destino_por_rol(request):
     if rol == ROL_ADMINISTRADOR:
         return redirect("admin_home")
     if rol == ROL_USUARIO:
-        return redirect("reportes")
+        return redirect("inicio")
     if rol == ROL_TECNICO:
         return redirect("tecnico")
     return redirect("login")
@@ -57,7 +57,10 @@ def requiere_sesion(vista):
 def inicio(request):
     # Conserva la página pública para visitantes, pero dirige a usuarios
     # autenticados a la pantalla adecuada para su rol.
-    if request.session.get("usuario_id"):
+    if (
+        request.session.get("usuario_id")
+        and request.session.get("usuario_rol") != ROL_USUARIO
+    ):
         return destino_por_rol(request)
     equipos = listar_equipos()
     return render(request, "index.html", {"equipos": equipos})

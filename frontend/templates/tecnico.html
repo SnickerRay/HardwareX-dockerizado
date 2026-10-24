@@ -1,4 +1,5 @@
-{% load static %}
+{% load static hardwarex_tags %}
+{% dashboard_tecnico as panel_tecnico %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,6 +8,7 @@
     <title>Panel Técnico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tecnico.css' %}">
     <style>
         .app-shell {
             grid-template-columns: 1fr 280px;
@@ -108,68 +110,110 @@
         <main class="main-panel">
             <header class="page-header">
                 <div>
-                    <p class="eyebrow" style="margin:0; color:#64748b; letter-spacing:.05em; text-transform:uppercase; font-size:.85rem;">Panel</p>
-                    <h1>Bienvenido técnico</h1>
-                    <p>Gestiona equipos, revisa solicitudes y supervisa mantenimientos desde una    MUHAs vista.</p>
+                    <p class="eyebrow">Panel técnico</p>
+                    <h1>Bienvenido, {{ request.session.usuario_nombre|default:"técnico" }}</h1>
+                    <p>Consulta tus equipos, acepta solicitudes y revisa los mantenimientos recientes.</p>
                 </div>
                 <div class="user-card">
                     <div class="avatar">TC</div>
                     <div class="user-details">
-                        <span class="name">Técnico</span>
+                        <span class="name">{{ request.session.usuario_nombre|default:"Técnico" }}</span>
                         <span class="role">Soporte</span>
                     </div>
                 </div>
             </header>
 
-            <section class="wizard-card">
-                <div class="wizard-header">
-                    <div class="wizard-step active">
-                        <div class="circle"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-                        <div>
-                            <strong>Resumen</strong>
-                            <div style="font-size:.85rem; color:#64748b;">Estado general</div>
-                        </div>
+            {% if messages %}
+            <div class="request-messages" role="status">
+                {% for message in messages %}
+                <p class="form-message {{ message.tags }}">{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <section class="wizard-card technician-dashboard">
+                <div class="technician-section-heading">
+                    <div>
+                        <p class="eyebrow">ACTIVIDAD</p>
+                        <h2>Equipos asignados</h2>
                     </div>
+                    <a class="btn secondary" href="/equipos/">Ver más...</a>
+                </div>
+                <div class="technician-preview-grid">
+                    {% for equipo in panel_tecnico.equipos %}
+                    <article class="equipment-card technician-preview-card">
+                        {% include "equipment_visual.html" %}
+                        <div class="equipment-details">
+                            <h3>{{ equipo.codigo }}</h3>
+                            <p><span>Tipo</span>{{ equipo.tipo_equipo|default:"Equipo" }}</p>
+                            <p><span>Falla</span>{{ equipo.motivo_falla|truncatechars:70 }}</p>
+                        </div>
+                    </article>
+                    {% empty %}
+                    <p class="technician-empty-state">Aún no tienes equipos asignados.</p>
+                    {% endfor %}
                 </div>
 
-                <p class="wizard-help">Aquí se muestran las estadísticas actuales del panel técnico.</p>
-
-                <div class="stats-grid">
-                    <article class="stat-card">
-                        <div class="status-pill"><i class="fa-solid fa-desktop"></i> Activo</div>
-                        <h3>Equipos Asignados</h3>
-                        <p class="stat-value">15</p>
-                        <p class="stat-copy">Equipos pendientes por revisar o atender.</p>
-                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
-                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                <div class="technician-section-heading technician-section-heading-spaced">
+                    <div>
+                        <p class="eyebrow">REQUIEREN TU ATENCIÓN</p>
+                        <h2>Solicitudes pendientes</h2>
+                    </div>
+                    <span class="technician-count">{{ panel_tecnico.solicitudes|length }} de 8</span>
+                </div>
+                <div class="technician-request-list">
+                    {% for asignacion in panel_tecnico.solicitudes %}
+                    <article class="technician-request-item">
+                        <div class="technician-request-copy">
+                            <strong>Equipo {{ asignacion.id_solicitud_fk.id_equipo_fk.codigo }}</strong>
+                            <span>Reporte #{{ asignacion.id_solicitud_fk.id_solicitud }} · {{ asignacion.id_solicitud_fk.descripcion|truncatechars:100 }}</span>
+                        </div>
+                        <form method="post" action="{% url 'aceptar_asignacion' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="id_asignacion" value="{{ asignacion.id_asignacion }}">
+                            <button class="btn primary" type="submit">Aceptar solicitud</button>
+                        </form>
                     </article>
+                    {% empty %}
+                    <p class="technician-empty-state">No tienes solicitudes pendientes de aceptar.</p>
+                    {% endfor %}
+                </div>
 
-                    <article class="stat-card">
-                        <div class="status-pill"><i class="fa-solid fa-bell"></i> Pendiente</div>
-                        <h3>Solicitudes Pendientes</h3>
-                        <p class="stat-value">8</p>
-                        <p class="stat-copy">Solicitudes que requieren seguimiento inmediato.</p>
-                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
-                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
+                <div class="technician-section-heading technician-section-heading-spaced">
+                    <div>
+                        <p class="eyebrow">TRABAJOS CERRADOS</p>
+                        <h2>Mantenimientos realizados</h2>
+                    </div>
+                    <a class="btn secondary" href="{% url 'mantenimientos' %}">Ver más...</a>
+                </div>
+                <div class="technician-preview-grid">
+                    {% for mantenimiento in panel_tecnico.mantenimientos %}
+                    <article class="equipment-card technician-preview-card">
+                        {% include "equipment_visual.html" %}
+                        <div class="equipment-details">
+                            <h3>Equipo {{ mantenimiento.codigo }}</h3>
+                            <p><span>Falla</span>{{ mantenimiento.motivo_falla|truncatechars:60 }}</p>
+                            <p><span>Fecha</span>{{ mantenimiento.fecha_fin|date:"d/m/Y" }}</p>
+                            <span class="badge success">Arreglado</span>
+                        </div>
                     </article>
+                    {% empty %}
+                    <p class="technician-empty-state">Aún no hay mantenimientos completados asociados a tu cuenta.</p>
+                    {% endfor %}
+                </div>
 
-                    <article class="stat-card">
-                        <div class="status-pill"><i class="fa-solid fa-check"></i> Completado</div>
-                        <h3>Mantenimientos Realizados</h3>
-                        <p class="stat-value">25</p>
-                        <p class="stat-copy">Trabajos cerrados correctamente en el periodo.</p>
-                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
-                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
-                    </article>
+                <div class="technician-report-callout">
+                    <div>
+                        <p class="eyebrow">DOCUMENTACIÓN</p>
+                        <h2>¿Finalizaste el mantenimiento de un equipo?</h2>
+                        <p>Prepara el reporte del trabajo realizado.</p>
+                    </div>
+                    <a class="btn primary" href="{% url 'reportes_tecnico' %}">Crear reporte</a>
+                </div>
 
-                    <article class="stat-card">
-                        <div class="status-pill"><i class="fa-solid fa-file-lines"></i> Generado</div>
-                        <h3>Reportes Generados</h3>
-                        <p class="stat-value">12</p>
-                        <p class="stat-copy">Reportes emitidos para seguimiento y control.</p>
-                        <a href="#" class="btn secondary stat-link">Ver detalle</a>
-                        <!-- Aquí se conectará la base de datos para cargar estos valores reales -->
-                    </article>
+                <div class="technician-report-empty">
+                    <span>Reportes generados</span>
+                    <p>El formulario ya está disponible. El almacenamiento de reportes aún no está configurado en la base de datos.</p>
                 </div>
             </section>
         </main>
@@ -187,15 +231,15 @@
 
             <nav class="menu">
                 <a href="{% url 'tecnico' %}" class="menu-item active"><i class="fa-solid fa-house"></i> Inicio</a>
-                <a href="{% url 'equipos' %}" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
+                <a href="/equipos/" class="menu-item"><i class="fa-solid fa-desktop"></i> Equipos</a>
                 <a href="{% url 'solicitudes' %}" class="menu-item"><i class="fa-solid fa-list-check"></i> Solicitudes</a>
                 <a href="{% url 'mantenimientos' %}" class="menu-item"><i class="fa-solid fa-screwdriver-wrench"></i> Mantenimientos</a>
-                <a href="{% url 'reportes' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
+                <a href="{% url 'reportes_tecnico' %}" class="menu-item"><i class="fa-solid fa-chart-column"></i> Reportes</a>
                 <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
             </nav>
 
             <div class="logout-area">
-                <a href="#" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
+                <a href="{% url 'logout' %}" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
             </div>
         </aside>
     </div>
