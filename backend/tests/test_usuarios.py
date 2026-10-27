@@ -11,15 +11,14 @@ from apps.usuarios.views import LoginView, LogoutView, PerfilView, RegisterView
 
 
 def add_session(request):
-    """Agrega una sesión real de Django al RequestFactory request."""
+    """Agrega una sesión de Django al RequestFactory request."""
     middleware = SessionMiddleware(lambda request: None)
     middleware.process_request(request)
-    request.session.save()
     return request
 
 
 @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies")
-class TestLoginView(SimpleTestCase):
+class TestLogoutView(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
 
@@ -176,13 +175,19 @@ class TestRegisterView(SimpleTestCase):
             data={},
         )
 
-        mock_render.return_value = Mock(status_code=200)
+        mock_render.return_value = HttpResponse(status=200)
         response = RegisterView.as_view()(request)
 
         self.assertEqual(response.status_code, 200)
-        mock_render.assert_called_once_with(
-            request, "login.html", {"error_registro": "Todos los campos son obligatorios."}
-        )
+        mock_render.assert_called_once()
+
+        args, kwargs = mock_render.call_args
+
+        self.assertEqual(args[1], "login.html")
+        self.assertEqual(args[2], {
+            "error_registro": "Todos los campos son obligatorios."
+        })
+        self.assertEqual(args[0]._request, request)
 
     @patch("apps.usuarios.views.render")
     @patch("apps.usuarios.views.Usuario.objects.filter")
@@ -194,13 +199,19 @@ class TestRegisterView(SimpleTestCase):
             data=self.data,
         )
 
-        mock_render.return_value = Mock(status_code=200)
+        mock_render.return_value = HttpResponse(status=200)
         response = RegisterView.as_view()(request)
 
         self.assertEqual(response.status_code, 200)
-        mock_render.assert_called_once_with(
-            request, "login.html", {"error_registro": "El correo ya está registrado."}
-        )
+        mock_render.assert_called_once()
+
+        args, kwargs = mock_render.call_args
+
+        self.assertEqual(args[1], "login.html")
+        self.assertEqual(args[2], {
+            "error_registro": "El correo ya está registrado."
+        })
+        self.assertEqual(args[0]._request, request)
         mock_filter.assert_called_once_with(
             email="juan@example.com"
         )
@@ -227,13 +238,19 @@ class TestRegisterView(SimpleTestCase):
             data=self.data,
         )
 
-        mock_render.return_value = Mock(status_code=200)
+        mock_render.return_value = HttpResponse(status=200)
         response = RegisterView.as_view()(request)
 
         self.assertEqual(response.status_code, 200)
-        mock_render.assert_called_once_with(
-            request, "login.html", {"error_registro": "El nombre de usuario ya está registrado."}
-        )
+        mock_render.assert_called_once()
+
+        args, kwargs = mock_render.call_args
+
+        self.assertEqual(args[1], "login.html")
+        self.assertEqual(args[2], {
+            "error_registro": "El nombre de usuario ya está registrado."
+        })
+        self.assertEqual(args[0]._request, request)
         mock_create.assert_not_called()
 
     @patch("apps.usuarios.views.Usuario.objects.create")
@@ -281,21 +298,28 @@ class TestRegisterView(SimpleTestCase):
         query.exists.return_value = False
         mock_filter.return_value = query
         mock_create.side_effect = Exception("DB error")
+        mock_render.return_value = HttpResponse(status=200)
 
         request = self.factory.post(
             "/usuarios/register/",
             data=self.data,
         )
 
-        mock_render.return_value = Mock(status_code=200)
         response = RegisterView.as_view()(request)
-
         self.assertEqual(response.status_code, 200)
-        mock_render.assert_called_once_with(
-            request, "login.html", {"error_registro": "Error al guardar el usuario: DB error"}
-        )
+
+        mock_render.assert_called_once()
+
+        args, kwargs = mock_render.call_args
+
+        self.assertEqual(args[1], "login.html")
+        self.assertEqual(args[2], {
+            "error_registro": "Error al guardar el usuario: DB error"
+        })
+        self.assertIs(args[0]._request, request)
 
 
+@override_settings(SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies")
 class TestLogoutView(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()

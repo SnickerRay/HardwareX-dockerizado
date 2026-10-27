@@ -5,6 +5,7 @@ Aplicacion para reportar y llevar un control ordenado de los equipos tecnologico
 - Lenguaje: HTML, CSS, Python, JavaScript
 - Framework / runtime: Django
 - Base de datos: PostgreSQL
+- Docker instalado
 
 
 ## Comandos
@@ -12,9 +13,7 @@ Aplicacion para reportar y llevar un control ordenado de los equipos tecnologico
 ### Ejecutar el servidor
 
 ```bash
-python manage.py runserver
-
-py manage.py test tests -v 2 --force-color
+docker compose exec web python manage.py test
 
 ### Detener el servidor
 
@@ -29,6 +28,8 @@ Ctrl + C
 - `[mantenimiento]/` - carpeta generada por Django
 - `[static]/` - contiene los archivos CSS, JS e IMG los cuales se conectan con la carpeta templates
 - `[templates]/` - contiene los archivos HTML
+- `[frontend]/` - contiene toda la parte visual de HardwareX
+- `[backend]/` - contiene todo la logica back de HardwareX
 - No mover ni renombrar archivos o carpetas existentes sin autorización.
 
 
