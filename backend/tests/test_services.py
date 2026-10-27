@@ -63,16 +63,19 @@ class TestUsuariosServices(SimpleTestCase):
 
 
 class TestEquiposServices(SimpleTestCase):
-    @patch("apps.equipos.services.Equipo.objects.all")
-    def test_listar_equipos_ordena_por_id(self, mock_all):
+    @patch("apps.equipos.services.Equipo.objects.select_related")
+    def test_listar_equipos_ordena_por_codigo(self, mock_select_related):
         queryset = Mock()
         queryset.order_by.return_value = ["equipo1", "equipo2"]
-        mock_all.return_value = queryset
+        mock_select_related.return_value = queryset
 
         result = listar_equipos()
 
-        mock_all.assert_called_once_with()
-        queryset.order_by.assert_called_once_with("id_equipo")
+        mock_select_related.assert_called_once_with(
+            "id_tipo_equipo_fk",
+            "id_ubicacion_fk",
+        )
+        queryset.order_by.assert_called_once_with("codigo")
         self.assertEqual(result, ["equipo1", "equipo2"])
 
 

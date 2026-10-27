@@ -92,9 +92,15 @@
                 <a href="{% url 'perfil_tecnico' %}" class="menu-item"><i class="fa-solid fa-user"></i> Mi perfil</a>
             </nav>
 
-            <div class="logout-area">
-                <a href="{% url 'login' %}" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a>
-            </div>
+        <div class="logout-area">
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn admin-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
         </aside>
     </div>
 
