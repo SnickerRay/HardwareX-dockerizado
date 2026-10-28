@@ -1,4 +1,4 @@
-{% load static %}
+{% load static hardwarex_tags %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -19,6 +19,7 @@
 </head>
 
 <body>
+{% include "app_header.html" %}
 
 <div class="app-shell">
 
@@ -37,11 +38,11 @@
                 </p>
 
                 <h1>
-                    Equipos registrados
+                    Equipos asignados
                 </h1>
 
                 <p>
-                    Lista general de los equipos activos en el sistema.
+                    Equipos que tienes asignados y están en mantenimiento.
                 </p>
 
             </div>
@@ -76,7 +77,7 @@
         <!-- TARJETA DE EQUIPOS -->
         <!-- ============================= -->
 
-        <section class="wizard-card">
+        <section class="wizard-card technician-assigned-page">
 
             <div class="wizard-header">
 
@@ -110,10 +111,59 @@
             <div class="page-intro">
 
                 <p>
-                    Esta vista muestra los equipos registrados
-                    y su estado de seguimiento.
+                    Revisa el código, la ubicación y el daño reportado para cada equipo asignado.
                 </p>
+            </div>
 
+            {% equipos_tecnico_asignados as equipos_tecnico %}
+            <div class="technician-equipment-list">
+                {% for equipo in equipos_tecnico %}
+                <article class="technician-equipment-card">
+                    {% include "equipment_visual.html" %}
+                    <div class="technician-equipment-copy">
+                        <p class="eyebrow">EQUIPO EN MANTENIMIENTO</p>
+                        <h2>{{ equipo.codigo }}</h2>
+                        <p>{{ equipo.motivo_falla }}</p>
+                        <dl>
+                            <div><dt>Tipo</dt><dd>{{ equipo.tipo_equipo|default:"No especificado" }}</dd></div>
+                            <div><dt>Ubicación</dt><dd>{% if equipo.salon %}{{ equipo.sede }} · {{ equipo.salon }}{% else %}Sin ubicación{% endif %}</dd></div>
+                            <div><dt>Estado</dt><dd>{{ equipo.estado_asignacion|capfirst }}</dd></div>
+                        </dl>
+                        <button class="btn primary" type="button" data-open-dialog="equipment-dialog-{{ equipo.id_asignacion }}">Ver más</button>
+                    </div>
+                </article>
+                <dialog class="technician-equipment-dialog" id="equipment-dialog-{{ equipo.id_asignacion }}">
+                    <div class="technician-dialog-heading">
+                        <div>
+                            <p class="eyebrow">DETALLE DEL REPORTE #{{ equipo.id_solicitud }}</p>
+                            <h2>{{ equipo.codigo }}</h2>
+                        </div>
+                        <button class="btn secondary" type="button" data-close-dialog aria-label="Cerrar detalle">Cerrar</button>
+                    </div>
+                    <div class="technician-dialog-content">
+                        {% include "equipment_visual.html" %}
+                        <dl>
+                            <div><dt>Tipo de equipo</dt><dd>{{ equipo.tipo_equipo|default:"No especificado" }}</dd></div>
+                            <div><dt>Código</dt><dd>{{ equipo.codigo }}</dd></div>
+                            <div><dt>Ubicación</dt><dd>{% if equipo.salon %}{{ equipo.sede }} · {{ equipo.salon }}{% else %}Sin ubicación{% endif %}</dd></div>
+                            <div><dt>Estado de asignación</dt><dd>{{ equipo.estado_asignacion|capfirst }}</dd></div>
+                            <div><dt>Daño reportado</dt><dd>{{ equipo.motivo_falla }}</dd></div>
+                            {% if equipo.descripcion_mantenimiento %}
+                            <div><dt>Nota de mantenimiento</dt><dd>{{ equipo.descripcion_mantenimiento }}</dd></div>
+                            {% endif %}
+                        </dl>
+                        {% if equipo.archivo_es_imagen %}
+                        <img class="technician-attachment" src="{{ equipo.archivo_ruta }}" alt="Imagen adjunta del mantenimiento">
+                        {% elif equipo.archivo_ruta %}
+                        <a class="btn secondary" href="{{ equipo.archivo_ruta }}" target="_blank" rel="noopener">Abrir archivo adjunto</a>
+                        {% else %}
+                        <p class="technician-empty-state">No hay imágenes adjuntas a este reporte.</p>
+                        {% endif %}
+                    </div>
+                </dialog>
+                {% empty %}
+                <p class="technician-empty-state">No tienes equipos asignados en este momento.</p>
+                {% endfor %}
             </div>
 
 
@@ -243,7 +293,7 @@
             <div class="logo-area">
 
                 <img
-                    src="{% static 'img/Logo.png' %}"
+                    src="{% static 'img/logo png.png' %}"
                     alt="Logo Hardwarex"
                     class="logo-image"
                 >
@@ -287,7 +337,7 @@
             <!-- EQUIPOS -->
 
             <a
-                href="{% url 'equipos' %}"
+                href="/equipos/"
                 class="menu-item active"
             >
 
@@ -329,7 +379,7 @@
             <!-- REPORTES -->
 
             <a
-                href="{% url 'reportes' %}"
+                href="{% url 'reportes_tecnico' %}"
                 class="menu-item"
             >
 
@@ -361,19 +411,15 @@
         <!-- ============================= -->
 
         <div class="logout-area">
-
-            <a
-                href="{% url 'login' %}"
-                class="menu-item"
-            >
-
-                <i class="fa-solid fa-right-from-bracket"></i>
-
-                Cerrar sesión
-
-            </a>
-
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn admin-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Cerrar sesión
+                </button>
+            </form>
         </div>
+
 
     </aside>
 
@@ -383,6 +429,7 @@
 <!-- JAVASCRIPT -->
 
 <script src="{% static 'js/tecnico.js' %}"></script>
+<script src="{% static 'js/technician-equipment.js' %}"></script>
 
 </body>
 
