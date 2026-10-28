@@ -1,293 +1,156 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>HardwareX - Login</title>
-
-    <link rel="icon" type="image/png" href="{% static 'img/logo_1.png' %}">
+    <meta name="theme-color" content="#0B1020">
+    <title>HardwareX | Acceso</title>
+    <link rel="icon" type="image/png" href="{% static 'img/logo png.png' %}">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css">
 </head>
-
 <body>
-
-    <header>
-        <div class="menu container">
-
-            <a href="{% url 'inicio' %}">
-                <img
-                    src="{% static 'img/Logo.png' %}"
-                    alt="HardwareX"
-                    class="logo"
-                >
+    <main class="auth-shell">
+        <section class="auth-brand" aria-label="HardwareX">
+            <a class="brand-logo-link" href="{% url 'inicio' %}">
+                <img class="brand-logo" src="{% static 'img/logo png.png' %}" alt="HardwareX">
             </a>
+            <p class="brand-caption">Gestión inteligente de infraestructura tecnológica</p>
+            <div class="brand-orbit brand-orbit-one"></div>
+            <div class="brand-orbit brand-orbit-two"></div>
+        </section>
 
-            <img
-                src="{% static 'img/escritura_zephyros.png' %}"
-                alt="HardwareX"
-                class="logo-1"
-            >
+        <section class="containers" id="container" aria-label="Acceso y registro">
+            <div class="form-container login-container">
+                <form id="loginForm" method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <p class="form-eyebrow">Acceso seguro</p>
+                    <h1>Iniciar sesión</h1>
+                    <p class="form-intro">Ingresa tus datos para continuar.</p>
 
-            <nav class="navbar">
-                <ul>
-                    <li>
-                        <a href="{% url 'inicio' %}">Home</a>
-                    </li>
+                    <label class="field-label" for="login-email">Correo</label>
+                    <input id="login-email" type="email" name="email" autocomplete="email"
+                           placeholder="nombre@correo.com" required>
 
-                    <li>
-                        <a href="{% url 'equipos' %}">Information</a>
-                    </li>
+                    <label class="field-label" for="login-password">Contraseña</label>
+                    <input id="login-password" type="password" name="clave" autocomplete="current-password"
+                           placeholder="Ingresa tu contraseña" required>
 
-                    <li>
-                        <a href="{% url 'equipos' %}">Products</a>
-                    </li>
+                    <label class="show-password" for="show-password">
+                        <input id="show-password" type="checkbox">
+                        <span class="custom-check" aria-hidden="true"></span>
+                        Mostrar contraseña
+                    </label>
 
-                    <li>
-                        <a href="{% url 'login' %}">Login/Register</a>
-                    </li>
-                </ul>
-            </nav>
+                    <button class="primary-button" type="submit">Iniciar sesión</button>
+                    {% if error %}
+                    <p class="form-message error-message" role="alert">{{ error }}</p>
+                    {% endif %}
+                    {% if messages %}
+                        {% for message in messages %}
+                        <p class="form-message {% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}" role="status">{{ message }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </form>
+            </div>
 
-        </div>
-    </header>
+            <div class="form-container register-container" inert>
+                <form id="registerForm" method="POST" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    <p class="form-eyebrow">Crea tu cuenta</p>
+                    <h1>Registro</h1>
+                    <p class="form-intro">Completa tus datos para empezar.</p>
 
-
-    <div class="containers" id="container">
-
-        <div class="form-container register-container">
-
-            <form
-                id="registerForm"
-                method="POST"
-                action="{% url 'register' %}"
-            >
-
-                {% csrf_token %}
-
-                <h1>REGISTER</h1>
-
-                <input
-                    type="text"
-                    name="nombres"
-                    placeholder="Nombre"
-                    required
-                >
-
-                <input
-                    type="text"
-                    name="apellidos"
-                    placeholder="Apellido"
-                    required
-                >
-
-                <input
-                    type="tel"
-                    name="numero_tel"
-                    placeholder="Número celular"
-                    required
-                >
-
-                <input
-                    type="text"
-                    name="nombre_usuario"
-                    placeholder="Nombre de Usuario"
-                    required
-                >
-
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    required
-                >
-
-                <input
-                    type="text"
-                    name="fecha_nacimiento"
-                    placeholder="Fecha de Nacimiento"
-                    onfocus="this.type='date'"
-                    onblur="if (!this.value) this.type='text'"
-                    required
-                >
-
-                <input
-                    type="password"
-                    name="clave"
-                    placeholder="Contraseña"
-                    required
-                >
-
-                <button type="submit">Register</button>
-
-            </form>
-
-        </div>
-
-
-        <div class="form-container login-container">
-
-            <form
-                id="loginForm"
-                method="POST"
-                action="{% url 'login' %}"
-            >
-
-                {% csrf_token %}
-
-                <h1>LOGIN</h1>
-
-                <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    required
-                >
-
-                <input
-                    type="password"
-                    name="clave"
-                    placeholder="Password"
-                    required
-                >
-
-                <div class="content">
-
-                    <div class="pass-link">
-                        <a href="#">
-                            ¿Olvidaste tu contraseña?
-                        </a>
+                    <div class="register-fields">
+                        <div class="register-field">
+                            <label class="field-label" for="register-nombres">Nombres</label>
+                            <div class="validated-input">
+                                <input id="register-nombres" type="text" name="nombres" autocomplete="given-name"
+                                       minlength="2" maxlength="100" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]+"
+                                       placeholder="Tus nombres" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field">
+                            <label class="field-label" for="register-apellidos">Apellidos</label>
+                            <div class="validated-input">
+                                <input id="register-apellidos" type="text" name="apellidos" autocomplete="family-name"
+                                       minlength="2" maxlength="100" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]+"
+                                       placeholder="Tus apellidos" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field">
+                            <label class="field-label" for="register-telefono">Número de teléfono</label>
+                            <div class="validated-input">
+                                <input id="register-telefono" type="tel" name="numero_tel" autocomplete="tel"
+                                       minlength="7" maxlength="20" pattern="[+0-9()\s-]{7,20}"
+                                       placeholder="+57 300 000 0000" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field">
+                            <label class="field-label" for="register-usuario">Nombre de usuario</label>
+                            <div class="validated-input">
+                                <input id="register-usuario" type="text" name="nombre_usuario" autocomplete="username"
+                                       minlength="3" maxlength="50" pattern="[A-Za-z0-9_.-]+"
+                                       placeholder="usuario" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field">
+                            <label class="field-label" for="register-email">Correo electrónico</label>
+                            <div class="validated-input">
+                                <input id="register-email" type="email" name="email" autocomplete="email"
+                                       maxlength="100" placeholder="nombre@correo.com" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field">
+                            <label class="field-label" for="register-fecha">Fecha de nacimiento</label>
+                            <div class="validated-input">
+                                <input id="register-fecha" type="date" name="fecha_nacimiento" autocomplete="bday"
+                                       max="{% now 'Y-m-d' %}" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
+                        <div class="register-field register-field-full">
+                            <label class="field-label" for="register-password">Contraseña</label>
+                            <div class="validated-input">
+                                <input id="register-password" type="password" name="clave" autocomplete="new-password"
+                                       minlength="8" maxlength="128" placeholder="Mínimo 8 caracteres" required>
+                                <span class="field-validity" aria-hidden="true"></span>
+                            </div>
+                        </div>
                     </div>
-
-                </div>
-
-                <button type="submit">
-                    Login
-                </button>
-
-                <div class="class-container">
-
-                    <a
-                        href="https://www.facebook.com/coldulcemaria/?locale=es_LA"
-                        class="social"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <i class="lni lni-facebook-square"></i>
-                    </a>
-
-                    <a
-                        href="https://colegiodulcemaria.edu.co/"
-                        class="social"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <i class="lni lni-google"></i>
-                    </a>
-
-                    <a
-                        href="https://www.instagram.com/colegiopedagogicodulcemaria/?hl=es-la"
-                        class="social"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <i class="lni lni-instagram"></i>
-                    </a>
-
-                </div>
-
-            </form>
-
-        </div>
-
-
-        <div class="overlay-container">
-
-            <div class="overlay">
-
-                <div class="overlay-panel overlay-left">
-
-                    <h1 class="title">
-                        HardwareX
-                    </h1>
-
-                    <p>
-                        Mantenimiento de equipos en un instante
-                    </p>
-
-                    <button
-                        type="button"
-                        class="ghost"
-                        id="login"
-                    >
-                        Login
-
-                        <i class="lni lni-arrow-left login"></i>
-                    </button>
-
-                </div>
-
-
-                <div class="overlay-panel overlay-right">
-
-                    <h1 class="title">
-                        Bienvenido
-                        <br>
-                        a
-                        <br>
-                        HardwareX
-                    </h1>
-
-                    <p>
-                        ¿No tienes una cuenta? Dale click aquí
-                    </p>
-
-                    <button
-                        type="button"
-                        class="ghost"
-                        id="register"
-                    >
-                        Registrar
-
-                        <i class="lni lni-arrow-right register"></i>
-                    </button>
-
-                </div>
-
+                    <button class="primary-button" type="submit">Registrarse</button>
+                    {% if error_registro %}
+                    <p class="form-message error-message" role="alert">{{ error_registro }}</p>
+                    {% endif %}
+                </form>
             </div>
 
-        </div>
-
-    </div>
-
-
-    {% if messages %}
-
-        {% for message in messages %}
-
-            <div class="message">
-                {{ message }}
+            <div class="overlay-container" aria-live="polite">
+                <div class="overlay">
+                    <div class="overlay-panel overlay-right">
+                        <span class="overlay-mark" aria-hidden="true">HX</span>
+                        <p class="overlay-kicker">HardwareX</p>
+                        <h2>¿Eres nuevo?</h2>
+                        <p>Regístrate y empieza a gestionar tus equipos.</p>
+                        <button class="ghost-button" type="button" id="register">Registro <span aria-hidden="true">→</span></button>
+                    </div>
+                    <div class="overlay-panel overlay-left" inert aria-hidden="true">
+                        <span class="overlay-mark" aria-hidden="true">HX</span>
+                        <p class="overlay-kicker">Qué bueno verte</p>
+                        <h2>¿Ya tienes cuenta?</h2>
+                        <p>Vuelve al acceso para continuar en HardwareX.</p>
+                        <button class="ghost-button" type="button" id="login"><span aria-hidden="true">←</span> Iniciar sesión</button>
+                    </div>
+                </div>
             </div>
-
-        {% endfor %}
-
-    {% endif %}
-
+        </section>
+        <footer class="auth-footer"><span class="footer-dot"></span> HardwareX · Control y mantenimiento</footer>
+    </main>
     <script src="{% static 'js/login.js' %}"></script>
-
-    <script
-        type="module"
-        src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
-    ></script>
-
-    <script
-        nomodule
-        src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
-    ></script>
-
 </body>
-
 </html>

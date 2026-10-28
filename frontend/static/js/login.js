@@ -1,192 +1,62 @@
-const registerButton =
-    document.getElementById("register");
+const registerButton = document.getElementById("register");
+const loginButton = document.getElementById("login");
+const container = document.getElementById("container");
+const loginPassword = document.getElementById("login-password");
+const showPassword = document.getElementById("show-password");
+const registerForm = document.getElementById("registerForm");
+const loginContainer = document.querySelector(".login-container");
+const registerContainer = document.querySelector(".register-container");
+const overlayRight = document.querySelector(".overlay-right");
+const overlayLeft = document.querySelector(".overlay-left");
 
-const loginButton =
-    document.getElementById("login");
+const setRegistrationActive = (active) => {
+    if (!container) return;
 
-const container =
-    document.getElementById("container");
-
+    container.classList.toggle("right-panel-active", active);
+    if (loginContainer) loginContainer.inert = active;
+    if (registerContainer) registerContainer.inert = !active;
+    if (overlayRight) overlayRight.inert = active;
+    if (overlayLeft) {
+        overlayLeft.inert = !active;
+        overlayLeft.setAttribute("aria-hidden", String(!active));
+    }
+    if (overlayRight) overlayRight.setAttribute("aria-hidden", String(active));
+};
 
 if (registerButton && container) {
-
-    registerButton.addEventListener(
-        "click",
-        () => {
-
-            container.classList.add(
-                "right-panel-active"
-            );
-
-        }
-    );
-
+    registerButton.addEventListener("click", () => {
+        setRegistrationActive(true);
+    });
 }
-
 
 if (loginButton && container) {
-
-    loginButton.addEventListener(
-        "click",
-        () => {
-
-            container.classList.remove(
-                "right-panel-active"
-            );
-
-        }
-    );
-
+    loginButton.addEventListener("click", () => {
+        setRegistrationActive(false);
+    });
 }
 
-
-// ==========================================
-// LOGIN
-// ==========================================
-
-const loginForm =
-    document.getElementById("loginForm");
-
-
-if (loginForm) {
-
-    loginForm.addEventListener(
-        "submit",
-        async (event) => {
-
-            event.preventDefault();
-
-            const formData =
-                new FormData(loginForm);
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        loginForm.action,
-                        {
-                            method: "POST",
-
-                            body: formData,
-
-                            credentials:
-                                "same-origin",
-
-                            headers: {
-                                "X-Requested-With":
-                                    "XMLHttpRequest"
-                            }
-                        }
-                    );
-
-
-                /*
-                 * El login todavía puede utilizar
-                 * fetch porque aquí queremos recibir
-                 * información para mantener la sesión.
-                 */
-
-                if (
-                    response.redirected
-                ) {
-
-                    window.location.href =
-                        response.url;
-
-                    return;
-
-                }
-
-
-                const contentType =
-                    response.headers.get(
-                        "content-type"
-                    );
-
-
-                if (
-                    contentType &&
-                    contentType.includes(
-                        "application/json"
-                    )
-                ) {
-
-                    const data =
-                        await response.json();
-
-                    if (!response.ok) {
-
-                        alert(
-                            data.detail ||
-                            "Correo o contraseña incorrectos."
-                        );
-
-                        return;
-                    }
-
-                } else {
-
-                    /*
-                     * Django respondió con HTML.
-                     * Lo utilizamos directamente.
-                     */
-
-                    document.open();
-
-                    document.write(
-                        await response.text()
-                    );
-
-                    document.close();
-
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "Error al iniciar sesión:",
-                    error
-                );
-
-                alert(
-                    "No se pudo conectar con el servidor."
-                );
-
-            }
-
-        }
-    );
-
+if (showPassword && loginPassword) {
+    showPassword.addEventListener("change", () => {
+        loginPassword.type = showPassword.checked ? "text" : "password";
+    });
 }
-
-
-// ==========================================
-// REGISTRO
-// ==========================================
-//
-// IMPORTANTE:
-//
-// NO HAY FETCH
-// NO HAY API
-// NO HAY JSON
-//
-// El formulario se manda directamente a Django.
-//
-
-const registerForm =
-    document.getElementById("registerForm");
-
 
 if (registerForm) {
+    const fields = registerForm.querySelectorAll(".validated-input input");
 
-    /*
-     * NO ponemos submit.
-     *
-     * NO hacemos event.preventDefault().
-     *
-     * Django recibirá directamente el POST.
-     */
+    fields.forEach((field) => {
+        const updateValidity = () => {
+            const wrapper = field.closest(".validated-input");
+            wrapper.classList.toggle("is-valid", field.value.length > 0 && field.validity.valid);
+            wrapper.classList.toggle("is-invalid", field.value.length > 0 && !field.validity.valid);
+        };
 
+        field.addEventListener("input", updateValidity);
+        field.addEventListener("change", updateValidity);
+        updateValidity();
+    });
+
+    if (registerForm.querySelector(".error-message") && container) {
+        setRegistrationActive(true);
+    }
 }
