@@ -1,7 +1,10 @@
+import hashlib
 import re
 from datetime import date
 
 from django.contrib.auth import logout
+from django.contrib.auth.hashers import make_password
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.shortcuts import redirect, render
@@ -14,6 +17,14 @@ from .services import autenticar_usuario, obtener_usuario
 
 
 # ==========================================
+# CONFIGURACION DE SEGURIDAD DEL LOGIN
+# ==========================================
+
+MAX_INTENTOS_LOGIN = 5
+TIEMPO_BLOQUEO_LOGIN = 15 * 60
+
+
+# ==========================================
 # LOGIN
 # ==========================================
 
@@ -22,13 +33,54 @@ class LoginView(APIView):
     @staticmethod
     def _destino_por_rol(request):
         rol = request.session.get("usuario_rol")
+
         if rol == 1:
             return redirect("admin_home")
+
         if rol == 2:
             return redirect("inicio")
+
         if rol == 3:
             return redirect("tecnico")
+
         return redirect("login")
+
+    @staticmethod
+    def _obtener_clave_bloqueo(email, ip):
+        identificador = f"{ip}:{email.lower().strip()}"
+
+        identificador_hash = hashlib.sha256(
+            identificador.encode("utf-8")
+        ).hexdigest()
+
+        return f"login_intentos_{identificador_hash}"
+
+    @staticmethod
+    def _registrar_intento_fallido(clave_cache):
+        if cache.add(
+            clave_cache,
+            1,
+            timeout=TIEMPO_BLOQUEO_LOGIN
+        ):
+            return 1
+
+        try:
+            intentos = cache.incr(clave_cache)
+
+        except ValueError:
+            cache.set(
+                clave_cache,
+                1,
+                timeout=TIEMPO_BLOQUEO_LOGIN
+            )
+            return 1
+
+        cache.touch(
+            clave_cache,
+            timeout=TIEMPO_BLOQUEO_LOGIN
+        )
+
+        return intentos
 
     def get(self, request):
 
@@ -55,12 +107,30 @@ class LoginView(APIView):
                 }
             )
 
-        usuario = autenticar_usuario(
-            email,
-            clave
+        # ==========================================
+        # IDENTIFICAR CORREO E IP
+        # ==========================================
+
+        ip = request.META.get(
+            "REMOTE_ADDR",
+            "desconocida"
         )
 
-        if usuario is None:
+        clave_cache = self._obtener_clave_bloqueo(
+            email,
+            ip
+        )
+
+        # ==========================================
+        # VERIFICAR SI ESTA BLOQUEADO
+        # ==========================================
+
+        intentos = cache.get(
+            clave_cache,
+            0
+        )
+
+        if intentos >= MAX_INTENTOS_LOGIN:
 
             return render(
                 request,
@@ -70,10 +140,43 @@ class LoginView(APIView):
                 }
             )
 
+        # ==========================================
+        # AUTENTICAR USUARIO
+        # ==========================================
+
+        usuario = autenticar_usuario(
+            email,
+            clave
+        )
+
+        if usuario is None:
+
+            self._registrar_intento_fallido(
+                clave_cache
+            )
+
+            return render(
+                request,
+                "login.html",
+                {
+                    "error": "Correo o contraseña incorrectos."
+                }
+            )
+
+        # ==========================================
+        # LOGIN CORRECTO: REINICIAR INTENTOS
+        # ==========================================
+
+        cache.delete(clave_cache)
+
+        # ==========================================
+        # CREAR SESION
+        # ==========================================
+        request.session.cycle_key()
+
         request.session["usuario_id"] = usuario.id_usuario
         request.session["usuario_nombre"] = usuario.nombre_usuario
         request.session["usuario_email"] = usuario.email
-        # El rol se toma del registro autenticado, nunca del formulario.
         request.session["usuario_rol"] = usuario.id_rol_fk
 
         request.session.set_expiry(
@@ -133,7 +236,6 @@ class RegisterView(APIView):
             ""
         ).strip()
 
-
         # ==========================================
         # VALIDAR CAMPOS
         # ==========================================
@@ -158,27 +260,40 @@ class RegisterView(APIView):
             )
 
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]{2,100}", nombres):
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "Ingresa nombres válidos (solo letras y espacios)."},
+                {
+                    "error_registro":
+                    "Ingresa nombres válidos (solo letras y espacios)."
+                },
             )
 
         if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]{2,100}", apellidos):
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "Ingresa apellidos válidos (solo letras y espacios)."},
+                {
+                    "error_registro":
+                    "Ingresa apellidos válidos (solo letras y espacios)."
+                },
             )
 
         if not re.fullmatch(r"[+0-9()\s-]{7,20}", numero_tel):
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "Ingresa un número de teléfono válido."},
+                {
+                    "error_registro":
+                    "Ingresa un número de teléfono válido."
+                },
             )
 
         if not re.fullmatch(r"[A-Za-z0-9_.-]{3,50}", nombre_usuario):
+
             return render(
                 request,
                 "login.html",
@@ -190,43 +305,61 @@ class RegisterView(APIView):
 
         try:
             validate_email(email)
+
         except ValidationError:
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "Ingresa un correo electrónico válido."},
+                {
+                    "error_registro":
+                    "Ingresa un correo electrónico válido."
+                },
             )
 
         try:
-            fecha_nacimiento_valida = date.fromisoformat(fecha_nacimiento)
+            fecha_nacimiento_valida = date.fromisoformat(
+                fecha_nacimiento
+            )
+
         except ValueError:
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "Ingresa una fecha de nacimiento válida."},
+                {
+                    "error_registro":
+                    "Ingresa una fecha de nacimiento válida."
+                },
             )
 
         if fecha_nacimiento_valida > date.today():
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "La fecha de nacimiento no puede ser futura."},
+                {
+                    "error_registro":
+                    "La fecha de nacimiento no puede ser futura."
+                },
             )
 
         if len(clave) < 8 or len(clave) > 128:
+
             return render(
                 request,
                 "login.html",
-                {"error_registro": "La contraseña debe tener entre 8 y 128 caracteres."},
+                {
+                    "error_registro":
+                    "La contraseña debe tener entre 8 y 128 caracteres."
+                },
             )
 
         # ==========================================
         # VALIDAR CORREO
         # ==========================================
 
-        if Usuario.objects.filter(
-            email=email
-        ).exists():
+        if Usuario.objects.filter(email=email).exists():
 
             return render(
                 request,
@@ -236,7 +369,6 @@ class RegisterView(APIView):
                     "El correo ya está registrado."
                 }
             )
-
 
         # ==========================================
         # VALIDAR USUARIO
@@ -255,50 +387,33 @@ class RegisterView(APIView):
                 }
             )
 
-
         # ==========================================
-        # GUARDAR DIRECTAMENTE EN POSTGRESQL
+        # GUARDAR USUARIO CON CONTRASEÑA HASHEADA
         # ==========================================
 
         try:
 
             Usuario.objects.create(
-
                 nombres=nombres,
-
                 apellidos=apellidos,
-
                 numero_tel=numero_tel,
-
                 nombre_usuario=nombre_usuario,
-
                 email=email,
-
                 fecha_nacimiento=fecha_nacimiento,
-
-                clave=clave,
-
-                # Rol Usuario
+                clave=make_password(clave),
                 id_rol_fk=2
             )
 
-        except Exception as error:
-
-            print(
-                "ERROR AL GUARDAR USUARIO:"
-            )
-
-            print(error)
+        except Exception:
 
             return render(
                 request,
                 "login.html",
                 {
                     "error_registro":
-                    f"Error al guardar el usuario: {error}"
+                    "No fue posible completar el registro. Inténtalo nuevamente."
                 }
             )
-
 
         # ==========================================
         # REGISTRO CORRECTO

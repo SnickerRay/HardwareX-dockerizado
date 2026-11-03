@@ -1,9 +1,11 @@
 import datetime
 from unittest.mock import Mock, patch
 
+from django.contrib.auth.hashers import check_password
 from django.http import HttpResponse
 from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.cache import cache
 
 from config.views import inicio
 from apps.usuarios.models import Usuario
@@ -18,9 +20,11 @@ def add_session(request):
 
 
 @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies")
-class TestLogoutView(SimpleTestCase):
+class TestLoginView(SimpleTestCase):
+
     def setUp(self):
         self.factory = RequestFactory()
+        cache.clear()
 
     @patch("apps.usuarios.views.render")
     def test_login_get_muestra_formulario(self, mock_render):
@@ -95,7 +99,10 @@ class TestLogoutView(SimpleTestCase):
         render_request, template_name, context = mock_render.call_args.args
         self.assertIs(render_request._request, request)
         self.assertEqual(template_name, "login.html")
-        self.assertEqual(context, {"error": "Debes ingresar correo y contraseña."})
+        self.assertEqual(
+            context,
+            {"error": "Debes ingresar correo y contraseña."},
+        )
 
     @patch("apps.usuarios.views.render")
     @patch("apps.usuarios.views.autenticar_usuario", return_value=None)
@@ -118,7 +125,10 @@ class TestLogoutView(SimpleTestCase):
         render_request, template_name, context = mock_render.call_args.args
         self.assertIs(render_request._request, request)
         self.assertEqual(template_name, "login.html")
-        self.assertEqual(context, {"error": "Correo o contraseña incorrectos."})
+        self.assertEqual(
+            context,
+            {"error": "Correo o contraseña incorrectos."},
+        )
         mock_auth.assert_called_once_with(
             "nadie@example.com",
             "incorrecta",
@@ -154,8 +164,151 @@ class TestLogoutView(SimpleTestCase):
             "usuario@example.com",
         )
 
+    @patch("apps.usuarios.views.render")
+    @patch("apps.usuarios.views.autenticar_usuario", return_value=None)
+    def test_login_bloquea_despues_de_cinco_intentos(
+        self,
+        mock_auth,
+        mock_render
+    ):
+        mock_render.return_value = HttpResponse(status=200)
+
+        for _ in range(5):
+            request = add_session(
+                self.factory.post(
+                    "/usuarios/login/",
+                    data={
+                        "email": "usuario@example.com",
+                        "clave": "incorrecta",
+                    },
+                    REMOTE_ADDR="192.168.1.10",
+                )
+            )
+            LoginView.as_view()(request)
+
+        self.assertEqual(mock_auth.call_count, 5)
+
+        request = add_session(
+            self.factory.post(
+                "/usuarios/login/",
+                data={
+                    "email": "usuario@example.com",
+                    "clave": "incorrecta",
+                },
+                REMOTE_ADDR="192.168.1.10",
+            )
+        )
+        response = LoginView.as_view()(request)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_auth.call_count, 5)
+        _, template_name, context = mock_render.call_args.args
+        self.assertEqual(template_name, "login.html")
+        self.assertEqual(
+            context,
+            {"error": "Correo o contraseña incorrectos."}
+        )
+
+    @patch("apps.usuarios.views.render")
+    @patch("apps.usuarios.views.autenticar_usuario")
+    def test_login_exitoso_reinicia_contador_de_intentos(
+        self,
+        mock_auth,
+        mock_render
+    ):
+        usuario = Mock()
+        usuario.id_usuario = 7
+        usuario.nombre_usuario = "usuario1"
+        usuario.email = "usuario@example.com"
+        usuario.id_rol_fk = 2
+        mock_auth.return_value = usuario
+        mock_render.return_value = HttpResponse(status=200)
+
+        ip = "192.168.1.20"
+        clave_cache = LoginView._obtener_clave_bloqueo(
+            "usuario@example.com",
+            ip
+        )
+        cache.set(clave_cache, 4, timeout=900)
+
+        request = add_session(
+            self.factory.post(
+                "/usuarios/login/",
+                data={
+                    "email": "usuario@example.com",
+                    "clave": "Password123",
+                },
+                REMOTE_ADDR=ip,
+            )
+        )
+        response = LoginView.as_view()(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNone(cache.get(clave_cache))
+
+    @patch("apps.usuarios.views.render")
+    @patch("apps.usuarios.views.autenticar_usuario", return_value=None)
+    def test_login_separa_intentos_por_direccion_ip(
+        self,
+        mock_auth,
+        mock_render
+    ):
+        mock_render.return_value = HttpResponse(status=200)
+        email = "usuario@example.com"
+
+        for _ in range(5):
+            request = add_session(
+                self.factory.post(
+                    "/usuarios/login/",
+                    data={
+                        "email": email,
+                        "clave": "incorrecta",
+                    },
+                    REMOTE_ADDR="192.168.1.30",
+                )
+            )
+            LoginView.as_view()(request)
+
+        request = add_session(
+            self.factory.post(
+                "/usuarios/login/",
+                data={
+                    "email": email,
+                    "clave": "incorrecta",
+                },
+                REMOTE_ADDR="192.168.1.31",
+            )
+        )
+        LoginView.as_view()(request)
+
+        self.assertEqual(mock_auth.call_count, 6)
+
+    def test_login_renueva_bloqueo_despues_de_intento_fallido(self):
+        clave_cache = "prueba_renovacion_bloqueo"
+
+        cache.add(
+            clave_cache,
+            1,
+            timeout=900
+        )
+
+        with patch("apps.usuarios.views.cache.touch") as mock_touch:
+            intentos = LoginView._registrar_intento_fallido(
+                clave_cache
+            )
+
+        self.assertEqual(intentos, 2)
+
+        mock_touch.assert_called_once_with(
+            clave_cache,
+            timeout=900
+        )
+
+        cache.delete(clave_cache)
+
 
 class TestRegisterView(SimpleTestCase):
+
     def setUp(self):
         self.factory = RequestFactory()
         self.data = {
@@ -184,9 +337,12 @@ class TestRegisterView(SimpleTestCase):
         args, kwargs = mock_render.call_args
 
         self.assertEqual(args[1], "login.html")
-        self.assertEqual(args[2], {
-            "error_registro": "Todos los campos son obligatorios."
-        })
+        self.assertEqual(
+            args[2],
+            {
+                "error_registro": "Todos los campos son obligatorios."
+            },
+        )
         self.assertEqual(args[0]._request, request)
 
     @patch("apps.usuarios.views.render")
@@ -208,9 +364,10 @@ class TestRegisterView(SimpleTestCase):
         args, kwargs = mock_render.call_args
 
         self.assertEqual(args[1], "login.html")
-        self.assertEqual(args[2], {
-            "error_registro": "El correo ya está registrado."
-        })
+        self.assertEqual(
+            args[2],
+            {"error_registro": "El correo ya está registrado."},
+        )
         self.assertEqual(args[0]._request, request)
         mock_filter.assert_called_once_with(
             email="juan@example.com"
@@ -247,15 +404,18 @@ class TestRegisterView(SimpleTestCase):
         args, kwargs = mock_render.call_args
 
         self.assertEqual(args[1], "login.html")
-        self.assertEqual(args[2], {
-            "error_registro": "El nombre de usuario ya está registrado."
-        })
+        self.assertEqual(
+            args[2],
+            {
+                "error_registro": "El nombre de usuario ya está registrado."
+            },
+        )
         self.assertEqual(args[0]._request, request)
         mock_create.assert_not_called()
 
     @patch("apps.usuarios.views.Usuario.objects.create")
     @patch("apps.usuarios.views.Usuario.objects.filter")
-    def test_register_guarda_usuario_directamente(
+    def test_register_guarda_usuario_con_clave_hasheada(
         self,
         mock_filter,
         mock_create,
@@ -274,21 +434,33 @@ class TestRegisterView(SimpleTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/usuarios/login/")
 
-        mock_create.assert_called_once_with(
-            nombres="Juan",
-            apellidos="Pérez",
-            numero_tel="3001234567",
-            nombre_usuario="juanp",
-            email="juan@example.com",
-            fecha_nacimiento="2005-05-20",
-            clave="Password123",
-            id_rol_fk=2,
+        mock_create.assert_called_once()
+
+        datos_guardados = mock_create.call_args.kwargs
+
+        self.assertEqual(datos_guardados["nombres"], "Juan")
+        self.assertEqual(datos_guardados["apellidos"], "Pérez")
+        self.assertEqual(datos_guardados["numero_tel"], "3001234567")
+        self.assertEqual(datos_guardados["nombre_usuario"], "juanp")
+        self.assertEqual(datos_guardados["email"], "juan@example.com")
+        self.assertEqual(datos_guardados["fecha_nacimiento"], "2005-05-20")
+        self.assertEqual(datos_guardados["id_rol_fk"], 2)
+
+        self.assertNotEqual(
+            datos_guardados["clave"],
+            self.data["clave"],
+        )
+        self.assertTrue(
+            check_password(
+                self.data["clave"],
+                datos_guardados["clave"],
+            )
         )
 
     @patch("apps.usuarios.views.render")
     @patch("apps.usuarios.views.Usuario.objects.create")
     @patch("apps.usuarios.views.Usuario.objects.filter")
-    def test_register_muestra_error_si_falla_la_base_de_datos(
+    def test_register_muestra_error_generico_si_falla_la_base_de_datos(
         self,
         mock_filter,
         mock_create,
@@ -313,14 +485,19 @@ class TestRegisterView(SimpleTestCase):
         args, kwargs = mock_render.call_args
 
         self.assertEqual(args[1], "login.html")
-        self.assertEqual(args[2], {
-            "error_registro": "Error al guardar el usuario: DB error"
-        })
+        self.assertEqual(
+            args[2],
+            {
+                "error_registro":
+                "No fue posible completar el registro. Inténtalo nuevamente."
+            },
+        )
         self.assertIs(args[0]._request, request)
 
 
 @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies")
 class TestLogoutView(SimpleTestCase):
+
     def setUp(self):
         self.factory = RequestFactory()
 
@@ -337,6 +514,7 @@ class TestLogoutView(SimpleTestCase):
 
 
 class TestPerfilView(SimpleTestCase):
+
     def setUp(self):
         self.factory = RequestFactory()
 
