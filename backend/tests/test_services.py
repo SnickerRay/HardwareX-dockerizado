@@ -8,6 +8,7 @@ from apps.usuarios.services import (
     obtener_usuario,
 )
 from apps.equipos.services import listar_equipos
+from apps.solicitudes.services import contar_solicitudes_pendientes
 
 
 class TestUsuariosServices(SimpleTestCase):
@@ -62,14 +63,30 @@ class TestUsuariosServices(SimpleTestCase):
 
 
 class TestEquiposServices(SimpleTestCase):
-    @patch("apps.equipos.services.Equipo.objects.all")
-    def test_listar_equipos_ordena_por_id(self, mock_all):
+    @patch("apps.equipos.services.Equipo.objects.select_related")
+    def test_listar_equipos_ordena_por_codigo(self, mock_select_related):
         queryset = Mock()
         queryset.order_by.return_value = ["equipo1", "equipo2"]
-        mock_all.return_value = queryset
+        mock_select_related.return_value = queryset
 
         result = listar_equipos()
 
-        mock_all.assert_called_once_with()
-        queryset.order_by.assert_called_once_with("id_equipo")
+        mock_select_related.assert_called_once_with(
+            "id_tipo_equipo_fk",
+            "id_ubicacion_fk",
+        )
+        queryset.order_by.assert_called_once_with("codigo")
         self.assertEqual(result, ["equipo1", "equipo2"])
+
+
+class TestSolicitudesServices(SimpleTestCase):
+    @patch("apps.solicitudes.services.Solicitud.objects.filter")
+    def test_contar_solicitudes_pendientes_incluye_las_asignadas(self, mock_filter):
+        queryset = Mock()
+        queryset.count.return_value = 4
+        mock_filter.return_value = queryset
+
+        result = contar_solicitudes_pendientes()
+
+        mock_filter.assert_called_once_with(estado="pendiente")
+        self.assertEqual(result, 4)

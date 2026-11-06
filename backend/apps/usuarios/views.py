@@ -1,4 +1,9 @@
+import re
+from datetime import date
+
 from django.contrib.auth import logout
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.shortcuts import redirect, render
 
 from rest_framework.response import Response
@@ -20,7 +25,7 @@ class LoginView(APIView):
         if rol == 1:
             return redirect("admin_home")
         if rol == 2:
-            return redirect("reportes")
+            return redirect("inicio")
         if rol == 3:
             return redirect("tecnico")
         return redirect("login")
@@ -152,6 +157,68 @@ class RegisterView(APIView):
                 }
             )
 
+        if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]{2,100}", nombres):
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "Ingresa nombres válidos (solo letras y espacios)."},
+            )
+
+        if not re.fullmatch(r"[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s'-]{2,100}", apellidos):
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "Ingresa apellidos válidos (solo letras y espacios)."},
+            )
+
+        if not re.fullmatch(r"[+0-9()\s-]{7,20}", numero_tel):
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "Ingresa un número de teléfono válido."},
+            )
+
+        if not re.fullmatch(r"[A-Za-z0-9_.-]{3,50}", nombre_usuario):
+            return render(
+                request,
+                "login.html",
+                {
+                    "error_registro":
+                    "El usuario debe tener 3-50 caracteres: letras, números, punto, guion o guion bajo."
+                },
+            )
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "Ingresa un correo electrónico válido."},
+            )
+
+        try:
+            fecha_nacimiento_valida = date.fromisoformat(fecha_nacimiento)
+        except ValueError:
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "Ingresa una fecha de nacimiento válida."},
+            )
+
+        if fecha_nacimiento_valida > date.today():
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "La fecha de nacimiento no puede ser futura."},
+            )
+
+        if len(clave) < 8 or len(clave) > 128:
+            return render(
+                request,
+                "login.html",
+                {"error_registro": "La contraseña debe tener entre 8 y 128 caracteres."},
+            )
 
         # ==========================================
         # VALIDAR CORREO

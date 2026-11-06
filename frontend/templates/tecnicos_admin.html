@@ -1,4 +1,4 @@
-{% load static %}
+{% load static hardwarex_tags %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,10 +9,11 @@
     <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 </head>
 <body>
+    {% include "app_header.html" %}
     <div class="admin-page">
         <header class="admin-header">
             <div class="admin-logo">
-                <img src="{% static 'img/Logo.png' %}" alt="Logo Hardwarex" class="logo-image-small">
+                <img src="{% static 'img/logo png.png' %}" alt="Logo Hardwarex" class="logo-image-small">
                 <span>Hardwarex</span>
             </div>
             <nav class="admin-top-menu">
@@ -22,9 +23,17 @@
                 <a href="{% url 'historial_admin' %}">Historial</a>
                 <a href="{% url 'equipos_admin' %}">Equipos</a>
                 <a href="{% url 'piezas' %}">Piezas</a>
-                <a href="{% url 'asignaciones' %}">Asignaciones</a>
             </nav>
-            <a href="{% url 'login' %}" class="btn admin-logout">Cerrar sesión</a>
+
+            <div class="logout-area">
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn admin-logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
         </header>
 
         <main class="admin-main">
@@ -44,14 +53,58 @@
             </section>
 
             <section class="wizard-card">
-                <div class="report-grid">
-                    <article class="report-card">
-                        <div class="report-head">
-                            <span class="report-title">Equipo técnico</span>
-                            <span class="badge success">Disponible</span>
-                        </div>
-                        <p class="report-text">Los técnicos registrados se mostrarán aquí cuando se conecte la consulta de usuarios.</p>
-                    </article>
+                {% if messages %}
+                    <div class="request-messages" role="status">
+                        {% for message in messages %}
+                            <p class="form-message {{ message.tags }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% tecnicos_admin_panel as tecnicos %}
+                {% solicitudes_asignables as solicitudes %}
+                <div class="technician-grid">
+                    {% for tecnico in tecnicos %}
+                        <article class="tech-card technician-card">
+                            <div class="technician-avatar-placeholder" aria-hidden="true">
+                                <svg viewBox="0 0 80 80" focusable="false">
+                                    <circle cx="40" cy="40" r="39" />
+                                    <circle class="avatar-person" cx="40" cy="29" r="13" />
+                                    <path class="avatar-person" d="M16 69c2-14 11-22 24-22s22 8 24 22" />
+                                </svg>
+                            </div>
+                            <h2>{{ tecnico.nombres }} {{ tecnico.apellidos }}</h2>
+                            <p class="technician-work-count">
+                                <strong>{{ tecnico.trabajos_asignados }}</strong>
+                                <span>trabajos asignados</span>
+                            </p>
+                            {% if tecnico.trabajos_pendientes %}
+                                <span class="badge warning technician-status">Asignado · {{ tecnico.trabajos_pendientes }} pendiente{{ tecnico.trabajos_pendientes|pluralize:"s" }}</span>
+                            {% else %}
+                                <span class="badge success technician-status">Disponible</span>
+                            {% endif %}
+
+                            <details class="technician-assignments">
+                                <summary class="btn primary">Asignar solicitud</summary>
+                                <div class="technician-list">
+                                    {% for solicitud in solicitudes %}
+                                        <form class="technician-row technician-request-row" method="post" action="{% url 'asignar_tecnico' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id_solicitud" value="{{ solicitud.id_solicitud }}">
+                                            <input type="hidden" name="id_tecnico" value="{{ tecnico.id_usuario }}">
+                                            <input type="hidden" name="origen" value="tecnicos_admin">
+                                            <span class="request-assignment-code">{{ solicitud.id_equipo_fk.codigo }}</span>
+                                            <span>Equipo #{{ solicitud.id_equipo_fk.id_equipo }}</span>
+                                            <button class="btn secondary" type="submit" aria-label="Asignar reporte {{ solicitud.id_solicitud }} a {{ tecnico.nombres }} {{ tecnico.apellidos }}">Asignar</button>
+                                        </form>
+                                    {% empty %}
+                                        <p class="technician-empty">No hay solicitudes pendientes para asignar.</p>
+                                    {% endfor %}
+                                </div>
+                            </details>
+                        </article>
+                    {% empty %}
+                        <p class="request-empty">No hay técnicos registrados.</p>
+                    {% endfor %}
                 </div>
             </section>
         </main>
