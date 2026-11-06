@@ -218,3 +218,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 .env.production
+
+# Copias de seguridad locales
+backups/
