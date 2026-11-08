@@ -293,7 +293,7 @@ Consulta `AGENT.md` antes de realizar cambios importantes. Este archivo contiene
 - **Iker Romero — [@SnickerRay](https://github.com/SnickerRay):** propietario actual del repositorio y líder técnico.
 - **Tania Castiblanco:** integrante del equipo.
 - **Adriana Buitrago:** integrante del equipo.
-- **Juan José Fuentes — [@Dova68](https://github.com/Dova68):** creador original del repositorio y colaborador.
+- **Juan José Fuentes — [@Dova68](https://github.com/Dova68):** creador original del repositorio.
 
 ## Licencia
 
