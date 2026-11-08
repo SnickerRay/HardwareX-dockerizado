@@ -8,6 +8,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from config.views import inicio
 from apps.usuarios.models import Usuario
 from apps.usuarios.views import LoginView, LogoutView, PerfilView, RegisterView
+from django.contrib.auth.hashers import check_password
 
 
 def add_session(request):
@@ -274,15 +275,20 @@ class TestRegisterView(SimpleTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/usuarios/login/")
 
-        mock_create.assert_called_once_with(
-            nombres="Juan",
-            apellidos="Pérez",
-            numero_tel="3001234567",
-            nombre_usuario="juanp",
-            email="juan@example.com",
-            fecha_nacimiento="2005-05-20",
-            clave="Password123",
-            id_rol_fk=2,
+        mock_create.assert_called_once()
+
+        datos_guardados = mock_create.call_args.kwargs
+
+        self.assertEqual(datos_guardados["nombres"], "Juan")
+        self.assertEqual(datos_guardados["apellidos"], "Pérez")
+        self.assertEqual(datos_guardados["numero_tel"], "3001234567")
+        self.assertEqual(datos_guardados["nombre_usuario"], "juanp")
+        self.assertEqual(datos_guardados["email"], "juan@example.com")
+        self.assertEqual(datos_guardados["fecha_nacimiento"], "2005-05-20")
+        self.assertEqual(datos_guardados["id_rol_fk"], 2)
+
+        self.assertTrue(
+            check_password("Password123", datos_guardados["clave"])
         )
 
     @patch("apps.usuarios.views.render")

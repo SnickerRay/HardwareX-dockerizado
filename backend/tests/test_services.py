@@ -1,5 +1,7 @@
+from django.contrib.auth.hashers import check_password
 from unittest.mock import Mock, patch
 
+from django.contrib.auth.hashers import make_password
 from django.test import SimpleTestCase
 
 from apps.usuarios.services import (
@@ -15,13 +17,10 @@ class TestUsuariosServices(SimpleTestCase):
     @patch("apps.usuarios.services.Usuario.objects.get")
     def test_autenticar_usuario_correcto(self, mock_get):
         usuario = Mock()
-        usuario.clave = "Password123"
+        usuario.clave = make_password("Password123")
         mock_get.return_value = usuario
 
-        result = autenticar_usuario(
-            "juan@example.com",
-            "Password123",
-        )
+        result = autenticar_usuario("juan@example.com", "Password123")
 
         self.assertIs(result, usuario)
         mock_get.assert_called_once_with(email="juan@example.com")
@@ -29,13 +28,10 @@ class TestUsuariosServices(SimpleTestCase):
     @patch("apps.usuarios.services.Usuario.objects.get")
     def test_autenticar_usuario_clave_incorrecta(self, mock_get):
         usuario = Mock()
-        usuario.clave = "Password123"
+        usuario.clave = make_password("Password123")
         mock_get.return_value = usuario
 
-        result = autenticar_usuario(
-            "juan@example.com",
-            "incorrecta",
-        )
+        result = autenticar_usuario("juan@example.com", "incorrecta")
 
         self.assertIsNone(result)
 

@@ -1,6 +1,9 @@
+from django.contrib.auth.hashers import check_password
+
 from .models import Usuario
 
-ROL_TECNICO = 3  # TODO: confirmar el id real del rol "técnico" en tu base de datos
+
+ROL_TECNICO = 3
 
 
 def autenticar_usuario(email, clave):
@@ -9,7 +12,7 @@ def autenticar_usuario(email, clave):
     except Usuario.DoesNotExist:
         return None
 
-    if usuario.clave != clave:
+    if not check_password(clave, usuario.clave):
         return None
 
     return usuario

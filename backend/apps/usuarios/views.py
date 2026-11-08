@@ -12,6 +12,8 @@ from rest_framework.views import APIView
 from .models import Usuario
 from .services import autenticar_usuario, obtener_usuario
 
+from django.contrib.auth.hashers import make_password
+
 
 # ==========================================
 # LOGIN
@@ -276,7 +278,7 @@ class RegisterView(APIView):
 
                 fecha_nacimiento=fecha_nacimiento,
 
-                clave=clave,
+                clave=make_password(clave),
 
                 # Rol Usuario
                 id_rol_fk=2
