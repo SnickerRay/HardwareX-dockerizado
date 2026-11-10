@@ -7,8 +7,7 @@ from django.contrib.auth.hashers import (
 from django.utils.crypto import constant_time_compare
 
 from .models import Usuario
-
-ROL_TECNICO = 3  # TODO: confirmar el id real del rol "técnico" en tu base de datos
+from .roles import ROL_TECNICO
 
 
 def autenticar_usuario(email, clave):
@@ -44,4 +43,6 @@ def obtener_usuario(id_usuario):
 
 
 def listar_tecnicos():
-    return Usuario.objects.filter(id_rol_fk=ROL_TECNICO).order_by("nombres")
+    return Usuario.objects.filter(
+        id_rol_fk=ROL_TECNICO
+    ).order_by("nombres")
