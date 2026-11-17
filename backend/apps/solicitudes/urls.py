@@ -3,11 +3,19 @@ from django.urls import path
 from .views import (
     AceptarAsignacionFormView,
     AsignarTecnicoFormView,
+    CrearSolicitudFormView,
     SolicitudDetailView,
     SolicitudListView,
 )
 
 urlpatterns = [
+
+    path(
+        "crear/",
+        CrearSolicitudFormView.as_view(),
+        name="crear_solicitud_form",
+    ),
+
     path(
         "aceptar-asignacion/",
         AceptarAsignacionFormView.as_view(),

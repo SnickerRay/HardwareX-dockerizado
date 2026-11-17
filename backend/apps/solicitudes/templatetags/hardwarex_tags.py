@@ -192,3 +192,7 @@ def equipos_reporte_formulario():
         "id_tipo_equipo_fk",
         "id_ubicacion_fk",
     )
+
+@register.simple_tag
+def total_solicitudes_pendientes():
+    return contar_solicitudes_pendientes()

@@ -50,6 +50,6 @@ urlpatterns = [
     path(
         "perfil/<int:id_usuario>/",
         PerfilView.as_view(),
-        name="perfil"
+        name="perfil_detalle"
     ),
 ]

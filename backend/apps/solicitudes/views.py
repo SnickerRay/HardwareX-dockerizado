@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.views import View
+from apps.equipos.models import Equipo
 
 from apps.usuarios.models import Usuario
 from .models import Asignacion, Solicitud
@@ -11,10 +12,75 @@ from .serializers import SolicitudSerializer
 from .services import (
     aceptar_asignacion,
     asignar_tecnico,
+    crear_solicitud,
     listar_solicitudes,
     obtener_solicitud,
 )
 
+class CrearSolicitudFormView(View):
+
+    def post(self, request):
+        id_usuario = request.session.get("usuario_id")
+        rol = request.session.get("usuario_rol")
+
+        if not id_usuario:
+            messages.error(
+                request,
+                "Debes iniciar sesión para crear una solicitud."
+            )
+            return redirect("login")
+
+        if rol not in (2, 1):
+            messages.error(
+                request,
+                "No tienes permiso para crear solicitudes."
+            )
+            return redirect("inicio")
+
+        try:
+            id_equipo = int(request.POST.get("id_equipo", ""))
+        except (TypeError, ValueError):
+            messages.error(request, "Selecciona un equipo válido.")
+            return redirect("inicio")
+
+        descripcion = request.POST.get("descripcion", "").strip()
+        prioridad = request.POST.get("prioridad", "").strip().lower()
+        tipo_falla = request.POST.get("tipo_falla", "").strip().lower()
+
+        try:
+            solicitud = crear_solicitud(
+                id_usuario=id_usuario,
+                id_equipo=id_equipo,
+                descripcion=descripcion,
+                prioridad=prioridad,
+                tipo_falla=tipo_falla,
+            )
+
+        except Usuario.DoesNotExist:
+            request.session.flush()
+            messages.error(
+                request,
+                "Tu sesión no corresponde a un usuario disponible."
+            )
+            return redirect("login")
+
+        except Equipo.DoesNotExist:
+            messages.error(
+                request,
+                "El equipo seleccionado ya no existe."
+            )
+            return redirect("inicio")
+
+        except ValueError as error:
+            messages.error(request, str(error))
+            return redirect("inicio")
+
+        messages.success(
+            request,
+            f"Tu solicitud #{solicitud.id_solicitud} fue creada correctamente."
+        )
+
+        return redirect("inicio")
 
 class AceptarAsignacionFormView(View):
 

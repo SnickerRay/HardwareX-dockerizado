@@ -49,10 +49,34 @@
                         <span class="report-title">Equipo {{ solicitud.id_equipo_fk.codigo|default:"sin detalle" }}</span>
                         <span class="badge warning">{{ solicitud.estado|default:"Sin estado" }}</span>
                     </div>
-                    <p class="report-text"><span>Reportado por</span>{{ solicitud.id_usuario_fk.nombres|default:"Usuario" }} {{ solicitud.id_usuario_fk.apellidos }}</p>
-                    <p class="report-text"><span>Tipo de daño</span>{{ solicitud.descripcion|default:"Detalle no disponible" }}</p>
-                    <p class="report-text"><span>Prioridad</span>{{ solicitud.prioridad_usuario|default:"No especificada" }}</p>
-                    <p class="report-text"><span>Solicitud</span>#{{ solicitud.id_solicitud }}</p>
+                    <p class="report-text">
+                        <span>Reportado por</span>
+                        {{ solicitud.id_usuario_fk.nombres|default:"Usuario" }}
+                            {{ solicitud.id_usuario_fk.apellidos }}
+                        </p>
+
+                    <p class="report-text">
+                        <span>Tipo de daño</span>
+                        {% for falla in solicitud.fallas.all %}
+                            {{ falla.tipo_falla|capfirst }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            No registrado
+                        {% endfor %}
+                    </p>
+                    <p class="report-text">
+                        <span>Descripción</span>
+                        {{ solicitud.descripcion|default:"Detalle no disponible" }}
+                    </p>
+
+                    <p class="report-text">
+                        <span>Prioridad</span>
+                        {{ solicitud.prioridad_usuario|default:"No especificada" }}
+                    </p>
+
+                    <p class="report-text">
+                        <span>Solicitud</span>
+                        #{{ solicitud.id_solicitud }}
+                    </p>
 
                     {% if request.session.usuario_rol == 1 %}
                     <details class="technician-picker">

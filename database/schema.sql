@@ -397,8 +397,8 @@ CREATE TABLE public.falla (
     tipo_falla character varying(20) NOT NULL,
     descripcion_tecnica text,
     fecha_deteccion timestamp without time zone DEFAULT now() NOT NULL,
-    CONSTRAINT falla_tipo_falla_check CHECK (((tipo_falla)::text = ANY (ARRAY[('software'::character varying)::text, ('hardware'::character varying)::text, ('pieza'::character varying)::text, ('otro'::character varying)::text])))
-);
+    CONSTRAINT falla_tipo_falla_check CHECK ( tipo_falla IN ('software', 'hardware', 'pieza', 'lentitud', 'otro')
+));
 
 
 --

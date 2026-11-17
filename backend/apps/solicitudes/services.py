@@ -1,8 +1,9 @@
 from django.db import connection, transaction
 from django.db.models import Count
 from django.utils import timezone
+from apps.equipos.models import Equipo
 
-from .models import Asignacion, Solicitud
+from .models import Asignacion, Falla, Solicitud
 from apps.usuarios.models import Usuario
 
 ESTADOS_ASIGNACION_ACTIVOS = ("asignado", "en_curso")
@@ -30,6 +31,7 @@ def listar_solicitudes_pendientes():
             asignaciones__estado_asignacion__in=ESTADOS_ASIGNACION_ACTIVOS
         )
         .select_related("id_usuario_fk", "id_equipo_fk__id_tipo_equipo_fk")
+        .prefetch_related("fallas")
         .order_by("-fecha_solicitud")
         .distinct()
     )
@@ -48,7 +50,7 @@ def listar_solicitudes_urgentes(limite=5):
 
 
 def contar_solicitudes_pendientes():
-    return Solicitud.objects.filter(estado="pendiente").count()
+    return listar_solicitudes_pendientes().count()
 
 
 def actividad_solicitudes_por_dia(fecha_inicio, fecha_fin):
@@ -213,5 +215,54 @@ def asignar_tecnico(id_solicitud, id_tecnico):
     )
     solicitud.estado = "en_proceso"
     solicitud.save(update_fields=["estado"])
+
+
+@transaction.atomic
+def crear_solicitud(
+    id_usuario,
+    id_equipo,
+    descripcion,
+    prioridad,
+    tipo_falla,
+):
+    prioridades_validas = ("baja", "media", "alta")
+    tipos_falla_validos = (
+        "software",
+        "hardware",
+        "pieza",
+        "lentitud",
+        "otro",
+    )
+
+    descripcion = descripcion.strip()
+    prioridad = prioridad.strip().lower()
+    tipo_falla = tipo_falla.strip().lower()
+
+    if not descripcion:
+        raise ValueError("La descripción del daño es obligatoria.")
+
+    if prioridad not in prioridades_validas:
+        raise ValueError("La prioridad seleccionada no es válida.")
+
+    if tipo_falla not in tipos_falla_validos:
+        raise ValueError("El tipo de falla seleccionado no es válido.")
+
+    usuario = Usuario.objects.get(id_usuario=id_usuario)
+    equipo = Equipo.objects.get(id_equipo=id_equipo)
+
+    solicitud = Solicitud.objects.create(
+        id_usuario_fk=usuario,
+        id_equipo_fk=equipo,
+        descripcion=descripcion,
+        prioridad_usuario=prioridad,
+        fecha_solicitud=timezone.now(),
+        estado="pendiente",
+    )
+
+    Falla.objects.create(
+        id_solicitud_fk=solicitud,
+        tipo_falla=tipo_falla,
+        fecha_deteccion=timezone.now(),
+    )
 
     return solicitud

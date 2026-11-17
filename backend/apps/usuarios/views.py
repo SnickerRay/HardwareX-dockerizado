@@ -10,8 +10,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Usuario
-from .services import autenticar_usuario, obtener_usuario
-
+from .services import (
+    autenticar_usuario,
+    obtener_usuario,
+    iniciar_sesion_unica,
+)
 from django.contrib.auth.hashers import make_password
 
 
@@ -72,15 +75,18 @@ class LoginView(APIView):
                 }
             )
 
-        request.session["usuario_id"] = usuario.id_usuario
-        request.session["usuario_nombre"] = usuario.nombre_usuario
-        request.session["usuario_email"] = usuario.email
-        # El rol se toma del registro autenticado, nunca del formulario.
-        request.session["usuario_rol"] = usuario.id_rol_fk
-
-        request.session.set_expiry(
-            60 * 60 * 8
-        )
+        if not iniciar_sesion_unica(request, usuario):
+            return render(
+                request,
+                "login.html",
+                {
+                    "error": (
+                        "Esta cuenta ya tiene una sesión activa. "
+                        "Cierra la sesión en el otro dispositivo "
+                        "antes de volver a ingresar."
+                    )
+                }
+            )
 
         return self._destino_por_rol(request)
 

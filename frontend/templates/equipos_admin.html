@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/admin.css' %}">
-    
+
 </head>
 <body>
     {% include "app_header.html" %}
@@ -118,7 +118,7 @@
 
                             </div>
 
-                <form method="POST">
+                <form method="POST" action="{% url 'gestionar_equipo' %}">
 
                     {% csrf_token %}
                     <input type="hidden" name="accion" value="agregar">
@@ -317,7 +317,7 @@
                         </div>
 
 
-                        <form method="POST">
+                        <form method="POST" action="{% url 'gestionar_equipo' %}">
 
                             {% csrf_token %}
 
@@ -360,7 +360,13 @@
 
                                         {% for equipo in equipos %}
 
-                                            <option value="{{ equipo.id_equipo }}">
+                                            <option
+                                                value="{{ equipo.id_equipo }}"
+                                                data-codigo="{{ equipo.codigo }}"
+                                                data-tipo="{{ equipo.id_tipo_equipo_fk_id }}"
+                                                data-fecha="{{ equipo.fecha_compra|date:'Y-m-d' }}"
+                                                data-ubicacion="{{ equipo.id_ubicacion_fk_id|default_if_none:'' }}"
+                                                data-estado="{{ equipo.estado_general }}">
 
                                                 {{ equipo.codigo }}
 
@@ -499,8 +505,8 @@
 
                                         Estado
 
-                                    </label> 
-                                    
+                                    </label>
+
                                     <select class="form-select" id="actualizar_estado" name="estado_general">
 
                                         <option value="operativo">
@@ -550,7 +556,7 @@
                 </div>
                     </div>
 
-                    <button type="button" class="fab-action" data-bs-toggle="modal" data-bs-target="#modalEliminarEquipo"> Eliminar </button>
+                    <button <button type="button" class="fab-action" data-bs-toggle="modal" data-bs-target="#modalEliminarEquipo">Dar de baja</button>
 
                     <div class="modal fade" id="modalEliminarEquipo" tabindex="-1" aria-labelledby="modalEliminarEquipoLabel" aria-hidden="true">
 
@@ -565,7 +571,7 @@
                                 <h5 class="modal-title"
                                     id="modalEliminarEquipoLabel">
 
-                                    Eliminar equipo
+                                    Dar de baja equipo
 
                                 </h5>
 
@@ -580,7 +586,7 @@
 
                             <!-- FORMULARIO -->
 
-                            <form method="POST">
+                            <form method="POST" action="{% url 'gestionar_equipo' %}">
 
                                 {% csrf_token %}
 
@@ -597,7 +603,7 @@
                                 <div class="modal-body">
 
                                     <p>
-                                        Selecciona el equipo que deseas eliminar.
+                                        Selecciona el equipo que deseas dar de baja.
                                     </p>
 
 
@@ -624,7 +630,13 @@
 
                                             {% for equipo in equipos %}
 
-                                                <option value="{{ equipo.id_equipo }}">
+                                                <option
+                                                    value="{{ equipo.id_equipo }}"
+                                                    data-codigo="{{ equipo.codigo }}"
+                                                    data-tipo="{{ equipo.id_tipo_equipo_fk_id }}"
+                                                    data-fecha="{{ equipo.fecha_compra|date:'Y-m-d' }}"
+                                                    data-ubicacion="{{ equipo.id_ubicacion_fk_id|default_if_none:'' }}"
+                                                    data-estado="{{ equipo.estado_general }}">
 
                                                     {{ equipo.codigo }}
 
@@ -644,8 +656,8 @@
 
                                         <strong>Advertencia:</strong>
 
-                                        Este equipo será eliminado
-                                        permanentemente de la base de datos.
+                                        Este equipo dejará de estar disponible,
+                                        pero conservará sus solicitudes y movimientos de piezas
 
                                     </div>
 
@@ -668,7 +680,7 @@
                                     <button type="submit"
                                             class="btn btn-danger">
 
-                                        Eliminar equipo
+                                        Dar de baja equipo
 
                                     </button>
 
@@ -681,15 +693,15 @@
                     </div>
 
                 </div>
-                    
+
 
                     <!-- <button class="fab-action" data-action="update">Actualizar</button>
-                    
+
                     <button class="fab-action" data-action="delete">Eliminar</button>
                 </div>
             </div>
 
-            Modal 
+            Modal
             <div id="modal-overlay" class="modal-overlay hidden" aria-hidden="true">
                 <div class="modal">
                     <header class="modal-header">
@@ -721,8 +733,8 @@
                     </div>
                 </div>
             </div> -->
-    
-    
+
+
     {{ equipos_json|json_script:"equipos-data" }}
     <script src="{% static 'js/admin.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

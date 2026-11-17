@@ -19,7 +19,7 @@ def add_session(request):
 
 
 @override_settings(SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies")
-class TestLogoutView(SimpleTestCase):
+class TestLoginView(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
 

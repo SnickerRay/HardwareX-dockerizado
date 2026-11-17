@@ -31,6 +31,31 @@ class Solicitud(models.Model):
         return f"Solicitud #{self.id_solicitud}"
 
 
+
+class Falla(models.Model):
+    id_falla = models.AutoField(primary_key=True)
+    id_solicitud_fk = models.ForeignKey(
+        Solicitud,
+        on_delete=models.DO_NOTHING,
+        db_column="id_solicitud_fk",
+        related_name="fallas",
+    )
+    tipo_falla = models.CharField(max_length=20)
+    descripcion_tecnica = models.TextField(
+        null=True,
+        blank=True,
+    )
+    fecha_deteccion = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = "falla"
+
+    def __str__(self):
+        return f"Falla #{self.id_falla} - {self.tipo_falla}"
+
+
+
 class Asignacion(models.Model):
     id_asignacion = models.AutoField(primary_key=True)
     id_solicitud_fk = models.ForeignKey(
