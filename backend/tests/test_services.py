@@ -1,9 +1,9 @@
-
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.test import SimpleTestCase
 
+from apps.usuarios.roles import ROL_TECNICO
 from apps.usuarios.services import (
     autenticar_usuario,
     listar_tecnicos,
@@ -21,12 +21,19 @@ class TestUsuariosServices(SimpleTestCase):
         usuario.clave = "Password123"
         mock_get.return_value = usuario
 
-        result = autenticar_usuario("juan@example.com", "Password123")
+        result = autenticar_usuario(
+            "juan@example.com",
+            "Password123",
+        )
 
         self.assertIs(result, usuario)
         self.assertNotEqual(usuario.clave, "Password123")
-        self.assertTrue(check_password("Password123", usuario.clave))
-        usuario.save.assert_called_once_with(update_fields=["clave"])
+        self.assertTrue(
+            check_password("Password123", usuario.clave)
+        )
+        usuario.save.assert_called_once_with(
+            update_fields=["clave"]
+        )
 
     @patch("apps.usuarios.services.Usuario.objects.get")
     def test_autenticar_usuario_correcto_con_clave_hasheada(self, mock_get):
@@ -35,7 +42,10 @@ class TestUsuariosServices(SimpleTestCase):
         hash_original = usuario.clave
         mock_get.return_value = usuario
 
-        result = autenticar_usuario("juan@example.com", "Password123")
+        result = autenticar_usuario(
+            "juan@example.com",
+            "Password123",
+        )
 
         self.assertIs(result, usuario)
         self.assertEqual(usuario.clave, hash_original)
@@ -44,14 +54,31 @@ class TestUsuariosServices(SimpleTestCase):
     @patch("apps.usuarios.services.Usuario.objects.get")
     def test_autenticar_usuario_clave_incorrecta(self, mock_get):
         usuario = Mock()
-        usuario.clave = "Password123"
+        usuario.clave = make_password("Password123")
+        hash_original = usuario.clave
         mock_get.return_value = usuario
 
-        result = autenticar_usuario("juan@example.com", "incorrecta")
+        result = autenticar_usuario(
+            "juan@example.com",
+            "incorrecta",
+        )
 
         self.assertIsNone(result)
-        self.assertEqual(usuario.clave, "Password123")
+        self.assertEqual(usuario.clave, hash_original)
         usuario.save.assert_not_called()
+
+    @patch("apps.usuarios.services.Usuario.objects.get")
+    def test_autenticar_usuario_inexistente(self, mock_get):
+        from apps.usuarios.models import Usuario
+
+        mock_get.side_effect = Usuario.DoesNotExist
+
+        result = autenticar_usuario(
+            "inexistente@example.com",
+            "Password123",
+        )
+
+        self.assertIsNone(result)
 
     @patch("apps.usuarios.services.Usuario.objects.get")
     def test_obtener_usuario_inexistente(self, mock_get):
@@ -71,7 +98,9 @@ class TestUsuariosServices(SimpleTestCase):
 
         result = listar_tecnicos()
 
-        mock_filter.assert_called_once_with(id_rol_fk=3)
+        mock_filter.assert_called_once_with(
+            id_rol_fk=ROL_TECNICO
+        )
         queryset.order_by.assert_called_once_with("nombres")
         self.assertEqual(result, ["tecnico"])
 

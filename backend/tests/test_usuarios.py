@@ -1,7 +1,9 @@
+
 import datetime
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.hashers import check_password
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.test import (
@@ -9,9 +11,10 @@ from django.test import (
     SimpleTestCase,
     override_settings,
 )
-from django.contrib.sessions.middleware import SessionMiddleware
 
 from config.views import inicio
+from apps.usuarios.models import Usuario
+from apps.usuarios.roles import ROL_ADMINISTRADOR, ROL_USUARIO, ROL_TECNICO
 from apps.usuarios.views import (
     LoginView,
     LogoutView,
@@ -54,7 +57,7 @@ class TestLoginView(SimpleTestCase):
     def test_login_get_con_sesion_de_usuario_redirige_al_index(self):
         request = add_session(self.factory.get("/usuarios/login/"))
         request.session["usuario_id"] = 10
-        request.session["usuario_rol"] = 2
+        request.session["usuario_rol"] = ROL_USUARIO
 
         response = LoginView.as_view()(request)
 
@@ -62,7 +65,10 @@ class TestLoginView(SimpleTestCase):
         self.assertEqual(response.url, "/")
 
     def test_login_redirige_admin_y_tecnico_a_sus_paneles(self):
-        for rol, url in ((1, "/admin-home/"), (3, "/tecnico/")):
+        for rol, url in (
+            (ROL_ADMINISTRADOR, "/admin-home/"),
+            (ROL_TECNICO, "/tecnico/"),
+        ):
             with self.subTest(rol=rol):
                 request = add_session(
                     self.factory.get("/usuarios/login/")
@@ -84,7 +90,7 @@ class TestLoginView(SimpleTestCase):
     ):
         request = add_session(self.factory.get("/"))
         request.session["usuario_id"] = 10
-        request.session["usuario_rol"] = 2
+        request.session["usuario_rol"] = ROL_USUARIO
 
         mock_render.return_value = HttpResponse(status=200)
 
@@ -174,7 +180,7 @@ class TestLoginView(SimpleTestCase):
         usuario.id_usuario = 7
         usuario.nombre_usuario = "usuario1"
         usuario.email = "usuario@example.com"
-        usuario.id_rol_fk = 2
+        usuario.id_rol_fk = ROL_USUARIO
 
         mock_auth.return_value = usuario
 
@@ -200,6 +206,10 @@ class TestLoginView(SimpleTestCase):
         self.assertEqual(
             request.session["usuario_email"],
             "usuario@example.com",
+        )
+        self.assertEqual(
+            request.session["usuario_rol"],
+            ROL_USUARIO,
         )
 
     @patch("apps.usuarios.views.render")
@@ -265,7 +275,7 @@ class TestLoginView(SimpleTestCase):
         usuario.id_usuario = 7
         usuario.nombre_usuario = "usuario1"
         usuario.email = "usuario@example.com"
-        usuario.id_rol_fk = 2
+        usuario.id_rol_fk = ROL_USUARIO
 
         mock_auth.return_value = usuario
         mock_render.return_value = HttpResponse(status=200)
@@ -531,7 +541,10 @@ class TestRegisterView(SimpleTestCase):
             datos_guardados["fecha_nacimiento"],
             "2005-05-20",
         )
-        self.assertEqual(datos_guardados["id_rol_fk"], 2)
+        self.assertEqual(
+            datos_guardados["id_rol_fk"],
+            ROL_USUARIO,
+        )
 
         self.assertNotEqual(
             datos_guardados["clave"],
@@ -644,7 +657,7 @@ class TestPerfilView(SimpleTestCase):
         request = self.crear_request_con_sesion(
             "/usuarios/perfil/99/",
             usuario_id=99,
-            rol=2,
+            rol=ROL_USUARIO,
         )
 
         response = PerfilView.as_view()(
@@ -670,14 +683,14 @@ class TestPerfilView(SimpleTestCase):
         usuario.nombre_usuario = "juanp"
         usuario.email = "juan@example.com"
         usuario.fecha_nacimiento = datetime.date(2005, 5, 20)
-        usuario.id_rol_fk = 2
+        usuario.id_rol_fk = ROL_USUARIO
 
         mock_get.return_value = usuario
 
         request = self.crear_request_con_sesion(
             "/usuarios/perfil/7/",
             usuario_id=7,
-            rol=2,
+            rol=ROL_USUARIO,
         )
 
         response = PerfilView.as_view()(
@@ -691,7 +704,10 @@ class TestPerfilView(SimpleTestCase):
             response.data["email"],
             "juan@example.com",
         )
-        self.assertEqual(response.data["id_rol_fk"], 2)
+        self.assertEqual(
+            response.data["id_rol_fk"],
+            ROL_USUARIO,
+        )
 
         mock_get.assert_called_once_with(7)
 
@@ -703,7 +719,7 @@ class TestPerfilView(SimpleTestCase):
         request = self.crear_request_con_sesion(
             "/usuarios/perfil/8/",
             usuario_id=7,
-            rol=2,
+            rol=ROL_USUARIO,
         )
 
         response = PerfilView.as_view()(
@@ -743,14 +759,14 @@ class TestPerfilView(SimpleTestCase):
         usuario.nombre_usuario = "carlosg"
         usuario.email = "carlos@example.com"
         usuario.fecha_nacimiento = datetime.date(2000, 5, 20)
-        usuario.id_rol_fk = 2
+        usuario.id_rol_fk = ROL_USUARIO
 
         mock_get.return_value = usuario
 
         request = self.crear_request_con_sesion(
             "/usuarios/perfil/8/",
             usuario_id=1,
-            rol=1,
+            rol=ROL_ADMINISTRADOR,
         )
 
         response = PerfilView.as_view()(
