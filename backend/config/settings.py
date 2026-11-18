@@ -94,10 +94,14 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.getenv("DB_NAME", "HardwareXx"),
         "USER": os.getenv("DB_USER", "postgres"),
+<<<<<<< HEAD
         "PASSWORD": os.getenv(
             "DB_PASSWORD",
             "c0lombia24"
         ),
+=======
+        "PASSWORD": os.environ["DB_PASSWORD"],
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
         "HOST": os.getenv("DB_HOST", "localhost"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }

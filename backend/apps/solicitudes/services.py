@@ -1,9 +1,17 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 from django.db import connection, transaction
 from django.db.models import Count
 from django.utils import timezone
 
 from .models import Asignacion, Solicitud
 from apps.usuarios.models import Usuario
+<<<<<<< HEAD
+=======
+from apps.usuarios.roles import ROL_TECNICO
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 
 ESTADOS_ASIGNACION_ACTIVOS = ("asignado", "en_curso")
 PRIORIDADES_URGENTES = ("alta", "urgente", "importante")
@@ -85,9 +93,18 @@ def _consultar_detalles_tecnico(
     solo_completados=False,
 ):
     clausula_limite = "LIMIT %s" if limite is not None else ""
+<<<<<<< HEAD
     if limite is not None:
         parametros.append(limite)
     placeholders = ", ".join(["%s"] * len(filtros))
+=======
+
+    if limite is not None:
+        parametros.append(limite)
+
+    placeholders = ", ".join(["%s"] * len(filtros))
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     if solo_completados:
         join_mantenimiento = """
             JOIN mantenimiento AS mantenimiento
@@ -113,6 +130,10 @@ def _consultar_detalles_tecnico(
         """
         filtro_completados = ""
         orden = "a.fecha_asignacion DESC, a.id_asignacion DESC"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     consulta = f"""
         SELECT
             a.id_asignacion,
@@ -148,6 +169,10 @@ def _consultar_detalles_tecnico(
         ORDER BY {orden}
         {clausula_limite}
     """
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     with connection.cursor() as cursor:
         cursor.execute(consulta, [id_tecnico, *filtros, *parametros])
         nombres_columnas = [columna[0] for columna in cursor.description]
@@ -161,6 +186,10 @@ def _consultar_detalles_tecnico(
         resultado["archivo_es_imagen"] = ruta_archivo.endswith(
             (".png", ".jpg", ".jpeg", ".gif", ".webp")
         )
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     return resultados
 
 
@@ -191,9 +220,16 @@ def asignar_tecnico(id_solicitud, id_tecnico):
         .select_for_update()
         .get(id_solicitud=id_solicitud)
     )
+<<<<<<< HEAD
     tecnico = Usuario.objects.get(id_usuario=id_tecnico)
 
     if tecnico.id_rol_fk != 3:
+=======
+
+    tecnico = Usuario.objects.get(id_usuario=id_tecnico)
+
+    if tecnico.id_rol_fk != ROL_TECNICO:
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
         raise ValueError("El usuario seleccionado no tiene rol de técnico.")
 
     if solicitud.estado != "pendiente":
@@ -211,7 +247,15 @@ def asignar_tecnico(id_solicitud, id_tecnico):
         fecha_asignacion=timezone.now(),
         estado_asignacion="asignado",
     )
+<<<<<<< HEAD
     solicitud.estado = "en_proceso"
     solicitud.save(update_fields=["estado"])
 
     return solicitud
+=======
+
+    solicitud.estado = "en_proceso"
+    solicitud.save(update_fields=["estado"])
+
+    return solicitud
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042

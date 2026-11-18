@@ -11,25 +11,54 @@ from apps.usuarios.services import listar_tecnicos
 from apps.reportes.services import listar_reportes
 from apps.solicitudes.services import listar_solicitudes
 
+<<<<<<< HEAD
 
 ROL_ADMINISTRADOR = 1
 ROL_USUARIO = 2
 ROL_TECNICO = 3
+=======
+from apps.usuarios.roles import (
+    ROL_ADMINISTRADOR,
+    ROL_USUARIO,
+    ROL_TECNICO,
+)
+
+
+ROLES_VALIDOS = (
+    ROL_ADMINISTRADOR,
+    ROL_USUARIO,
+    ROL_TECNICO,
+)
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 
 
 def destino_por_rol(request):
     """Devuelve la pantalla inicial correspondiente al rol de la sesión."""
     rol = request.session.get("usuario_rol")
+<<<<<<< HEAD
     if rol == ROL_ADMINISTRADOR:
         return redirect("admin_home")
     if rol == ROL_USUARIO:
         return redirect("inicio")
     if rol == ROL_TECNICO:
         return redirect("tecnico")
+=======
+
+    if rol == ROL_ADMINISTRADOR:
+        return redirect("admin_home")
+
+    if rol == ROL_USUARIO:
+        return redirect("inicio")
+
+    if rol == ROL_TECNICO:
+        return redirect("tecnico")
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     return redirect("login")
 
 
 def roles_requeridos(*roles):
+<<<<<<< HEAD
     """Protege vistas HTML validando el rol almacenado en la sesión del servidor."""
     def decorador(vista):
         @wraps(vista)
@@ -41,6 +70,26 @@ def roles_requeridos(*roles):
                 return destino_por_rol(request)
             return vista(request, *args, **kwargs)
         return protegida
+=======
+    """Protege vistas HTML validando el rol almacenado en la sesión."""
+    def decorador(vista):
+        @wraps(vista)
+        def protegida(request, *args, **kwargs):
+
+            usuario_id = request.session.get("usuario_id")
+            rol = request.session.get("usuario_rol")
+
+            if not usuario_id or rol not in ROLES_VALIDOS:
+                return redirect("login")
+
+            if rol not in roles:
+                return destino_por_rol(request)
+
+            return vista(request, *args, **kwargs)
+
+        return protegida
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     return decorador
 
 
@@ -48,13 +97,26 @@ def requiere_sesion(vista):
     """Exige una sesión válida sin restringir el rol."""
     @wraps(vista)
     def protegida(request, *args, **kwargs):
+<<<<<<< HEAD
         if not request.session.get("usuario_id"):
             return redirect("login")
         return vista(request, *args, **kwargs)
+=======
+
+        usuario_id = request.session.get("usuario_id")
+        rol = request.session.get("usuario_rol")
+
+        if not usuario_id or rol not in ROLES_VALIDOS:
+            return redirect("login")
+
+        return vista(request, *args, **kwargs)
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     return protegida
 
 
 def inicio(request):
+<<<<<<< HEAD
     # Conserva la página pública para visitantes, pero dirige a usuarios
     # autenticados a la pantalla adecuada para su rol.
     if (
@@ -64,11 +126,36 @@ def inicio(request):
         return destino_por_rol(request)
     equipos = listar_equipos()
     return render(request, "index.html", {"equipos": equipos})
+=======
+    # Conserva la página pública para visitantes.
+    # Los usuarios autenticados de otros roles van a su pantalla correspondiente.
+    if request.session.get("usuario_id"):
+
+        rol = request.session.get("usuario_rol")
+
+        if rol not in ROLES_VALIDOS:
+            return redirect("login")
+
+        if rol != ROL_USUARIO:
+            return destino_por_rol(request)
+
+    equipos = listar_equipos()
+
+    return render(
+        request,
+        "index.html",
+        {"equipos": equipos},
+    )
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 
 
 def login_page(request):
     if request.session.get("usuario_id"):
         return destino_por_rol(request)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     return render(request, "login.html")
 
 
@@ -85,7 +172,16 @@ def historial_admin(request):
 @requiere_sesion
 def equipos(request):
     lista_equipos = listar_equipos()
+<<<<<<< HEAD
     return render(request, "equipos.html", {"equipos": lista_equipos})
+=======
+
+    return render(
+        request,
+        "equipos.html",
+        {"equipos": lista_equipos},
+    )
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 
 
 @roles_requeridos(ROL_ADMINISTRADOR)
@@ -97,11 +193,19 @@ def equipos_admin(request):
             "equipos": listar_equipos(),
             "tipos_equipo": listar_tipos_equipo(),
             "ubicaciones": listar_ubicaciones(),
+<<<<<<< HEAD
         }
     )
 
 
 @requiere_sesion
+=======
+        },
+    )
+
+
+@roles_requeridos(ROL_ADMINISTRADOR, ROL_TECNICO)
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 def mantenimientos(request):
     return render(request, "mantenimientos.html")
 
@@ -116,7 +220,11 @@ def perfil_tecnico(request):
     return render(request, "perfil_tecnico.html")
 
 
+<<<<<<< HEAD
 @roles_requeridos(ROL_ADMINISTRADOR)
+=======
+@roles_requeridos(ROL_ADMINISTRADOR, ROL_TECNICO)
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 def piezas(request):
     return render(request, "piezas.html")
 
@@ -134,7 +242,11 @@ def reportes_recientes(request):
         {
             "reportes": listar_reportes(),
             "tecnicos": listar_tecnicos(),
+<<<<<<< HEAD
         }
+=======
+        },
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     )
 
 
@@ -163,7 +275,11 @@ def admin_home(request):
     return render(
         request,
         "admin_home.html",
+<<<<<<< HEAD
         {"solicitudes": listar_solicitudes()}
+=======
+        {"solicitudes": listar_solicitudes()},
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     )
 
 

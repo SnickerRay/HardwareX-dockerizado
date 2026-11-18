@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
 from pathlib import Path
 import re
 from unittest.mock import patch
@@ -26,6 +30,10 @@ LOGIN_JS = BASE_DIR / "frontend" / "static" / "js" / "login.js"
 
 
 class TestLoginFrontend(SimpleTestCase):
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -71,6 +79,10 @@ class TestLoginFrontend(SimpleTestCase):
 
 
 class TestEquiposFrontend(SimpleTestCase):
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -90,6 +102,10 @@ class TestEquiposFrontend(SimpleTestCase):
 
 
 class TestAdminTechniciansFrontend(SimpleTestCase):
+<<<<<<< HEAD
+=======
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -135,8 +151,64 @@ class TestAdminTechniciansFrontend(SimpleTestCase):
             fetch_redirect_response=False,
         )
 
+<<<<<<< HEAD
 
 class TestTechnicianFrontend(SimpleTestCase):
+=======
+    @patch("apps.solicitudes.views.messages.error")
+    @patch("apps.solicitudes.views.asignar_tecnico")
+    def test_usuario_no_puede_asignar_tecnicos(
+        self,
+        mock_asignar,
+        _mock_mensaje,
+    ):
+        request = RequestFactory().post(
+            "/solicitudes-api/asignar-tecnico/",
+            {
+                "id_solicitud": "12",
+                "id_tecnico": "4",
+            },
+        )
+        request.session = {"usuario_id": 10, "usuario_rol": 2}
+
+        response = AsignarTecnicoFormView.as_view()(request)
+
+        mock_asignar.assert_not_called()
+        self.assertRedirects(
+            response,
+            reverse("solicitudes"),
+            fetch_redirect_response=False,
+        )
+
+    @patch("apps.solicitudes.views.messages.error")
+    @patch("apps.solicitudes.views.asignar_tecnico")
+    def test_tecnico_no_puede_asignar_tecnicos(
+        self,
+        mock_asignar,
+        _mock_mensaje,
+    ):
+        request = RequestFactory().post(
+            "/solicitudes-api/asignar-tecnico/",
+            {
+                "id_solicitud": "12",
+                "id_tecnico": "4",
+            },
+        )
+        request.session = {"usuario_id": 4, "usuario_rol": 3}
+
+        response = AsignarTecnicoFormView.as_view()(request)
+
+        mock_asignar.assert_not_called()
+        self.assertRedirects(
+            response,
+            reverse("solicitudes"),
+            fetch_redirect_response=False,
+        )
+
+
+class TestTechnicianFrontend(SimpleTestCase):
+
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -190,3 +262,50 @@ class TestTechnicianFrontend(SimpleTestCase):
             reverse("tecnico"),
             fetch_redirect_response=False,
         )
+<<<<<<< HEAD
+=======
+
+    @patch("apps.solicitudes.views.messages.error")
+    @patch("apps.solicitudes.views.aceptar_asignacion")
+    def test_administrador_no_puede_aceptar_asignaciones(
+        self,
+        mock_aceptar,
+        _mock_mensaje,
+    ):
+        request = RequestFactory().post(
+            "/solicitudes-api/aceptar-asignacion/",
+            {"id_asignacion": "17"},
+        )
+        request.session = {"usuario_id": 1, "usuario_rol": 1}
+
+        response = AceptarAsignacionFormView.as_view()(request)
+
+        mock_aceptar.assert_not_called()
+        self.assertRedirects(
+            response,
+            reverse("inicio"),
+            fetch_redirect_response=False,
+        )
+
+    @patch("apps.solicitudes.views.messages.error")
+    @patch("apps.solicitudes.views.aceptar_asignacion")
+    def test_usuario_no_puede_aceptar_asignaciones(
+        self,
+        mock_aceptar,
+        _mock_mensaje,
+    ):
+        request = RequestFactory().post(
+            "/solicitudes-api/aceptar-asignacion/",
+            {"id_asignacion": "17"},
+        )
+        request.session = {"usuario_id": 10, "usuario_rol": 2}
+
+        response = AceptarAsignacionFormView.as_view()(request)
+
+        mock_aceptar.assert_not_called()
+        self.assertRedirects(
+            response,
+            reverse("inicio"),
+            fetch_redirect_response=False,
+        )
+>>>>>>> 035ab46f93a09b1663ac2b8f0c1ff71d737b9042
