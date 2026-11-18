@@ -8,9 +8,9 @@ from .views import (
 )
 
 
-urlpatterns = [
+urlpatterns = (
 
-    # ===============1===========================
+    # ==========================================
     # LOGIN
     # ==========================================
 
@@ -19,7 +19,6 @@ urlpatterns = [
         LoginView.as_view(),
         name="login"
     ),
-
 
     # ==========================================
     # REGISTRO
@@ -31,7 +30,6 @@ urlpatterns = [
         name="register"
     ),
 
-
     # ==========================================
     # LOGOUT
     # ==========================================
@@ -42,14 +40,19 @@ urlpatterns = [
         name="logout"
     ),
 
-
     # ==========================================
     # PERFIL
     # ==========================================
 
     path(
-        "perfil/<int:id_usuario>/",
+        "perfil/",
         PerfilView.as_view(),
         name="perfil"
     ),
-]
+
+    path(
+        "perfil/<int:id_usuario>/",
+        PerfilView.as_view(),
+        name="perfil_detalle"
+    ),
+)

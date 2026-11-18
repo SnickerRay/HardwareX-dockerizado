@@ -116,9 +116,7 @@ class LoginView(APIView):
                 },
             )
 
-        # ==========================================
         # IDENTIFICAR CORREO E IP
-        # ==========================================
 
         ip = request.META.get(
             "REMOTE_ADDR",
@@ -130,9 +128,7 @@ class LoginView(APIView):
             ip,
         )
 
-        # ==========================================
         # VERIFICAR SI ESTA BLOQUEADO
-        # ==========================================
 
         intentos = cache.get(
             clave_cache,
@@ -148,9 +144,7 @@ class LoginView(APIView):
                 },
             )
 
-        # ==========================================
         # AUTENTICAR USUARIO
-        # ==========================================
 
         try:
             usuario = autenticar_usuario(
@@ -188,15 +182,11 @@ class LoginView(APIView):
                 },
             )
 
-        # ==========================================
         # LOGIN CORRECTO: REINICIAR INTENTOS
-        # ==========================================
 
         cache.delete(clave_cache)
 
-        # ==========================================
         # CREAR SESION
-        # ==========================================
 
         request.session.cycle_key()
 
@@ -262,9 +252,7 @@ class RegisterView(APIView):
             "",
         ).strip()
 
-        # ==========================================
         # VALIDAR CAMPOS
-        # ==========================================
 
         if not all([
             nombres,
@@ -329,20 +317,31 @@ class RegisterView(APIView):
                 },
             )
 
-        if not re.fullmatch(
-            r"[A-Za-z0-9_.-]{3,50}",
-            nombre_usuario,
-        ):
+        # VALIDAR NOMBRE DE USUARIO
+
+        if not nombre_usuario:
             return render(
                 request,
                 "login.html",
                 {
                     "error_registro": (
-                        "El usuario debe tener 3-50 caracteres: "
-                        "letras, números, punto, guion o guion bajo."
+                        "El nombre de usuario es obligatorio."
                     )
                 },
             )
+
+        if len(nombre_usuario) > 50:
+            return render(
+                request,
+                "login.html",
+                {
+                    "error_registro": (
+                        "El nombre de usuario no puede superar 50 caracteres."
+                    )
+                },
+            )
+
+        # VALIDAR CORREO
 
         try:
             validate_email(email)
@@ -357,6 +356,8 @@ class RegisterView(APIView):
                     )
                 },
             )
+
+        # VALIDAR FECHA DE NACIMIENTO
 
         try:
             fecha_nacimiento_valida = date.fromisoformat(
@@ -385,6 +386,8 @@ class RegisterView(APIView):
                 },
             )
 
+        # VALIDAR CONTRASEÑA
+
         if len(clave) < 8 or len(clave) > 128:
             return render(
                 request,
@@ -397,9 +400,7 @@ class RegisterView(APIView):
                 },
             )
 
-        # ==========================================
         # VALIDAR Y GUARDAR USUARIO
-        # ==========================================
 
         try:
 
@@ -428,6 +429,7 @@ class RegisterView(APIView):
                 )
 
             # Guardar usuario con contraseña hasheada.
+
             Usuario.objects.create(
                 nombres=nombres,
                 apellidos=apellidos,
@@ -455,9 +457,7 @@ class RegisterView(APIView):
                 },
             )
 
-        # ==========================================
         # REGISTRO CORRECTO
-        # ==========================================
 
         return redirect("login")
 
@@ -489,41 +489,227 @@ class PerfilView(APIView):
 
     permission_classes = [EsUsuarioAutenticado]
 
-    def get(self, request, id_usuario):
+    def get(self, request, id_usuario=None):
 
-        permiso_propietario = EsUsuarioPropietario()
+        usuario_id = request.session.get("usuario_id")
 
-        if not permiso_propietario.tiene_propiedad(
-            request,
-            id_usuario,
-        ):
-            return Response(
-                {
-                    "detail": (
-                        "No tienes permisos para consultar "
-                        "este perfil."
-                    )
-                },
-                status=403,
-            )
+        if not usuario_id:
+            return redirect("login")
 
-        usuario = obtener_usuario(id_usuario)
+        # CONSULTAR UN PERFIL ESPECIFICO
+
+        if id_usuario is not None:
+
+            permiso_propietario = EsUsuarioPropietario()
+
+            if not permiso_propietario.tiene_propiedad(
+                request,
+                id_usuario
+            ):
+                return Response(
+                    {
+                        "detail": (
+                            "No tienes permisos para consultar "
+                            "este perfil."
+                        )
+                    },
+                    status=403
+                )
+
+            usuario = obtener_usuario(id_usuario)
+
+            if usuario is None:
+                return Response(
+                    {"detail": "Usuario no encontrado."},
+                    status=404
+                )
+
+            return Response({
+                "id_usuario": usuario.id_usuario,
+                "nombres": usuario.nombres,
+                "apellidos": usuario.apellidos,
+                "numero_tel": usuario.numero_tel,
+                "nombre_usuario": usuario.nombre_usuario,
+                "email": usuario.email,
+                "fecha_nacimiento": usuario.fecha_nacimiento,
+                "id_rol_fk": usuario.id_rol_fk,
+            })
+
+        # CONSULTAR PERFIL PROPIO
+
+        usuario = obtener_usuario(usuario_id)
 
         if usuario is None:
+            return redirect("login")
+
+        return render(
+            request,
+            "perfil.html",
+            {"usuario": usuario}
+        )
+
+    def post(self, request, id_usuario=None):
+
+        usuario_id = request.session.get("usuario_id")
+
+        if not usuario_id:
+            return redirect("login")
+
+        # IMPEDIR MODIFICACIONES DE PERFILES AJENOS
+
+        if id_usuario is not None and id_usuario != usuario_id:
             return Response(
-                {
-                    "detail": "Usuario no encontrado."
-                },
-                status=404,
+                {"detail": "No tienes permisos para modificar este perfil."},
+                status=403
             )
 
-        return Response({
-            "id_usuario": usuario.id_usuario,
-            "nombres": usuario.nombres,
-            "apellidos": usuario.apellidos,
-            "numero_tel": usuario.numero_tel,
-            "nombre_usuario": usuario.nombre_usuario,
-            "email": usuario.email,
-            "fecha_nacimiento": usuario.fecha_nacimiento,
-            "id_rol_fk": usuario.id_rol_fk,
-        })
+        usuario = obtener_usuario(usuario_id)
+
+        if usuario is None:
+            return redirect("login")
+
+        nombres = request.POST.get("nombres", "").strip()
+        apellidos = request.POST.get("apellidos", "").strip()
+        numero_tel = request.POST.get("numero_tel", "").strip()
+        nombre_usuario = request.POST.get("nombre_usuario", "").strip()
+        email = request.POST.get("email", "").strip()
+        fecha_nacimiento = request.POST.get("fecha_nacimiento", "").strip()
+
+        datos = {
+            "nombres": nombres,
+            "apellidos": apellidos,
+            "numero_tel": numero_tel,
+            "nombre_usuario": nombre_usuario,
+            "email": email,
+            "fecha_nacimiento": fecha_nacimiento,
+        }
+
+        def respuesta_error(mensaje):
+            return render(
+                request,
+                "perfil.html",
+                {
+                    "usuario": usuario,
+                    "datos_formulario": datos,
+                    "error": mensaje,
+                }
+            )
+
+        # VALIDAR CAMPOS OBLIGATORIOS
+
+        if not all(datos.values()):
+            return respuesta_error(
+                "Todos los campos son obligatorios."
+            )
+
+        # VALIDAR NOMBRES
+
+        patron_nombres = r"[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s'-]{2,100}"
+
+        if not re.fullmatch(patron_nombres, nombres):
+            return respuesta_error("Ingresa nombres válidos.")
+
+        if not re.fullmatch(patron_nombres, apellidos):
+            return respuesta_error("Ingresa apellidos válidos.")
+
+        # VALIDAR TELEFONO
+
+        if not re.fullmatch(r"[+0-9()\s-]{7,20}", numero_tel):
+            return respuesta_error("Ingresa un teléfono válido.")
+
+        # VALIDAR NOMBRE DE USUARIO SIN RESTRINGIR CARACTERES
+
+        if not nombre_usuario:
+            return respuesta_error(
+                "El nombre de usuario es obligatorio."
+            )
+
+        if len(nombre_usuario) > 50:
+            return respuesta_error(
+                "El nombre de usuario no puede superar 50 caracteres."
+            )
+
+        # VALIDAR CORREO
+
+        try:
+            validate_email(email)
+
+        except ValidationError:
+            return respuesta_error(
+                "Ingresa un correo electrónico válido."
+            )
+
+        # VALIDAR FECHA DE NACIMIENTO
+
+        try:
+            fecha_nacimiento_valida = date.fromisoformat(
+                fecha_nacimiento
+            )
+
+        except ValueError:
+            return respuesta_error("Ingresa una fecha válida.")
+
+        if fecha_nacimiento_valida > date.today():
+            return respuesta_error(
+                "La fecha de nacimiento no puede ser futura."
+            )
+
+        # COMPROBAR CORREO DUPLICADO
+
+        if Usuario.objects.filter(email=email).exclude(
+            id_usuario=usuario_id
+        ).exists():
+            return respuesta_error(
+                "El correo electrónico ya está registrado."
+            )
+
+        # COMPROBAR NOMBRE DE USUARIO DUPLICADO
+
+        if Usuario.objects.filter(
+            nombre_usuario=nombre_usuario
+        ).exclude(id_usuario=usuario_id).exists():
+            return respuesta_error(
+                "El nombre de usuario ya está registrado."
+            )
+
+        # ACTUALIZAR CAMPOS PERMITIDOS
+
+        try:
+            usuario.nombres = nombres
+            usuario.apellidos = apellidos
+            usuario.numero_tel = numero_tel
+            usuario.nombre_usuario = nombre_usuario
+            usuario.email = email
+            usuario.fecha_nacimiento = fecha_nacimiento_valida
+
+            usuario.save(update_fields=[
+                "nombres",
+                "apellidos",
+                "numero_tel",
+                "nombre_usuario",
+                "email",
+                "fecha_nacimiento",
+            ])
+
+            # ACTUALIZAR SESION
+
+            request.session["usuario_nombre"] = nombre_usuario
+            request.session["usuario_email"] = email
+
+            return render(
+                request,
+                "perfil.html",
+                {
+                    "usuario": usuario,
+                    "mensaje": "Tus datos se actualizaron correctamente."
+                }
+            )
+
+        except Exception:
+            logger.exception(
+                "Error al actualizar el perfil del usuario."
+            )
+
+            return respuesta_error(
+                "No fue posible actualizar tus datos. Inténtalo nuevamente."
+            )
