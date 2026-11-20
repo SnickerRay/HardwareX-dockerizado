@@ -34,7 +34,6 @@ def add_session(request):
     SESSION_ENGINE="django.contrib.sessions.backends.signed_cookies"
 )
 class TestLoginView(SimpleTestCase):
-
     def setUp(self):
         self.factory = RequestFactory()
         cache.clear()
@@ -778,3 +777,4 @@ class TestPerfilView(SimpleTestCase):
         self.assertEqual(response.data["id_usuario"], 8)
 
         mock_get.assert_called_once_with(8)
+

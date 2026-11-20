@@ -124,14 +124,15 @@ class TestEquiposServices(SimpleTestCase):
 
 
 class TestSolicitudesServices(SimpleTestCase):
-
-    @patch("apps.solicitudes.services.Solicitud.objects.filter")
-    def test_contar_solicitudes_pendientes_incluye_las_asignadas(self, mock_filter):
+    @patch("apps.solicitudes.services.listar_solicitudes_pendientes")
+    def test_contar_solicitudes_pendientes_cuenta_resultados(self, mock_listar):
         queryset = Mock()
         queryset.count.return_value = 4
-        mock_filter.return_value = queryset
+        mock_listar.return_value = queryset
 
         result = contar_solicitudes_pendientes()
 
-        mock_filter.assert_called_once_with(estado="pendiente")
+        mock_listar.assert_called_once()
+        queryset.count.assert_called_once_with()
         self.assertEqual(result, 4)
+

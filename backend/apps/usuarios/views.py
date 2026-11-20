@@ -15,14 +15,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Usuario
-from .services import autenticar_usuario, obtener_usuario
+from .services import (
+    autenticar_usuario,
+    obtener_usuario,
+    iniciar_sesion_unica,
+)
 from .permissions import EsUsuarioAutenticado, EsUsuarioPropietario
 from .roles import (
     ROL_ADMINISTRADOR,
     ROL_USUARIO,
     ROL_TECNICO,
 )
-
 
 # ==========================================
 # CONFIGURACION Y REGISTRO DE ERRORES
@@ -188,26 +191,22 @@ class LoginView(APIView):
                 },
             )
 
-        # ==========================================
-        # LOGIN CORRECTO: REINICIAR INTENTOS
-        # ==========================================
-
+        # Reiniciar intentos fallidos tras autenticar correctamente.
         cache.delete(clave_cache)
 
-        # ==========================================
-        # CREAR SESION
-        # ==========================================
-
-        request.session.cycle_key()
-
-        request.session["usuario_id"] = usuario.id_usuario
-        request.session["usuario_nombre"] = usuario.nombre_usuario
-        request.session["usuario_email"] = usuario.email
-        request.session["usuario_rol"] = usuario.id_rol_fk
-
-        request.session.set_expiry(
-            60 * 60 * 8
-        )
+        # Impedir sesiones simultáneas para la misma cuenta.
+        if not iniciar_sesion_unica(request, usuario):
+            return render(
+                request,
+                "login.html",
+                {
+                    "error": (
+                        "Esta cuenta ya tiene una sesión activa. "
+                        "Cierra la sesión en el otro dispositivo "
+                        "antes de volver a ingresar."
+                    )
+                },
+            )
 
         return self._destino_por_rol(request)
 
@@ -527,3 +526,5 @@ class PerfilView(APIView):
             "fecha_nacimiento": usuario.fecha_nacimiento,
             "id_rol_fk": usuario.id_rol_fk,
         })
+
+

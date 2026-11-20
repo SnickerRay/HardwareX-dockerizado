@@ -1,4 +1,5 @@
 {% load static %}
+{% load hardwarex_tags %}
 <style>
     :root {
         color-scheme: dark;
@@ -154,6 +155,21 @@
         background-color: rgba(16,22,42,.7) !important;
         color: var(--app-text) !important;
     }
+
+    .notification-count {
+        display: inline-flex;
+        min-width: 21px;
+        height: 21px;
+        align-items: center;
+        justify-content: center;
+        margin-left: 7px;
+        padding: 0 6px;
+        border-radius: 20px;
+        background: var(--app-amber);
+        color: #08101f;
+        font-size: .72rem;
+        font-weight: 800;
+    }
     .user-card .avatar, .avatar { background: linear-gradient(135deg, var(--app-cyan), var(--app-violet)) !important; color: #08101f !important; }
     .user-details .name, .stat-card h3, .report-title, .equipment-card h3 { color: var(--app-text) !important; }
     .user-details .role, .stat-copy, .report-text, .equipment-card p, .role-label { color: var(--app-muted) !important; }
@@ -208,8 +224,13 @@
         {% if request.session.usuario_rol == 1 %}
             <a href="{% url 'admin_home' %}" class="{% if request.resolver_match.url_name == 'admin_home' %}active{% endif %}">Dashboard</a>
             <a href="{% url 'reportes_recientes' %}" class="{% if request.resolver_match.url_name == 'reportes_recientes' %}active{% endif %}">Reportes</a>
-            <a href="{% url 'solicitudes' %}" class="{% if request.resolver_match.url_name == 'solicitudes' %}active{% endif %}">Solicitudes</a>
-            <a href="{% url 'tecnicos_admin' %}" class="{% if request.resolver_match.url_name == 'tecnicos_admin' %}active{% endif %}">Técnicos</a>
+            {% total_solicitudes_pendientes as solicitudes_pendientes %}
+            <a href="{% url 'solicitudes' %}" class="{% if request.resolver_match.url_name == 'solicitudes' %}active{% endif %}">
+                Solicitudes
+                {% if solicitudes_pendientes > 0 %}
+                    <span class="notification-count">{{ solicitudes_pendientes }}</span>
+                {% endif %}
+            </a>            <a href="{% url 'tecnicos_admin' %}" class="{% if request.resolver_match.url_name == 'tecnicos_admin' %}active{% endif %}">Técnicos</a>
             <a href="{% url 'historial_admin' %}" class="{% if request.resolver_match.url_name == 'historial_admin' %}active{% endif %}">Historial</a>
             <a href="{% url 'equipos_admin' %}" class="{% if request.resolver_match.url_name == 'equipos_admin' %}active{% endif %}">Equipos</a>
             <a href="{% url 'piezas' %}" class="{% if request.resolver_match.url_name == 'piezas' %}active{% endif %}">Piezas</a>

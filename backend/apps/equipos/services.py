@@ -34,3 +34,14 @@ def listar_tipos_equipo():
 
 def listar_ubicaciones():
     return Ubicacion.objects.all().order_by("sede", "salon")
+
+def dar_de_baja_equipo(id_equipo):
+    equipo = obtener_equipo(id_equipo)
+
+    if equipo is None:
+        return False
+
+    equipo.estado_general = "dado_de_baja"
+    equipo.save(update_fields=["estado_general"])
+
+    return True
