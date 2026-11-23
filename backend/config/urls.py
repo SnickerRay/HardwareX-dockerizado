@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from apps.usuarios.views import PerfilView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -13,7 +14,7 @@ urlpatterns = [
     path("equipos/", views.equipos, name="equipos"),
     path("equipos-admin/", views.equipos_admin, name="equipos_admin"),
     path("mantenimientos/", views.mantenimientos, name="mantenimientos"),
-    path("perfil/", views.perfil, name="perfil"),
+    path("perfil/", PerfilView.as_view(), name="perfil"),
     path("perfil-tecnico/", views.perfil_tecnico, name="perfil_tecnico"),
     path("piezas/", views.piezas, name="piezas"),
     path("reportes/", views.reportes, name="reportes"),

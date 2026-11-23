@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
@@ -10,6 +11,7 @@
 </head>
 <body>
     {% include "app_header.html" %}
+
     <div class="app-shell">
         <aside class="sidebar">
             <div>
@@ -17,39 +19,55 @@
                     <i class="fa-solid fa-microchip"></i>
                     <span>Hardwarex</span>
                 </div>
+
                 <p style="color:#94a3b8; padding-right: 8px; line-height:1.6;">
                     Control de equipos y seguimiento de mantenimientos en una sola vista.
                 </p>
             </div>
 
             <nav class="menu">
-                <a href="{% url 'inicio' %}" class="menu-item"><i class="fa-solid fa-circle-plus"></i> Registrar Daño</a>
-                <a href="{% url 'historial' %}" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i> Historial</a>
-                <a href="{% url 'perfil' %}" class="menu-item active"><i class="fa-solid fa-user"></i> Mi Perfil</a>
+                <a href="{% url 'inicio' %}" class="menu-item">
+                    <i class="fa-solid fa-circle-plus"></i> Registrar Daño
+                </a>
+
+                <a href="{% url 'historial' %}" class="menu-item">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Historial
+                </a>
+
+                <a href="{% url 'perfil' %}" class="menu-item active">
+                    <i class="fa-solid fa-user"></i> Mi Perfil
+                </a>
             </nav>
 
-        <div class="logout-area">
-            <form method="POST" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn admin-logout">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    Cerrar sesión
-                </button>
-            </form>
-        </div>
+            <div class="logout-area">
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn admin-logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
         </aside>
 
         <main class="main-panel">
             <header class="page-header">
                 <div>
-                    <p class="eyebrow" style="margin:0; color:#64748b; letter-spacing:.05em; text-transform:uppercase; font-size:.85rem;">Usuario</p>
+                    <p class="eyebrow" style="margin:0; color:#64748b; letter-spacing:.05em; text-transform:uppercase; font-size:.85rem;">
+                        Usuario
+                    </p>
+
                     <h1>Mi Perfil</h1>
                     <p>Actualiza tus datos y revisa un resumen de tus reportes.</p>
                 </div>
+
                 <div class="user-card">
                     <div class="avatar" id="header-avatar">JD</div>
+
                     <div class="user-details">
-                        <span class="name" id="header-name">{{ usuario.nombre_usuario }}</span>
+                        <span class="name" id="header-name">
+                            {{ usuario.nombre_usuario }}
+                        </span>
                         <span class="role">Usuario</span>
                     </div>
                 </div>
@@ -57,100 +75,196 @@
 
             <section class="wizard-card">
                 <div class="wizard-header" role="tablist" aria-label="Secciones perfil">
-                    <a href="{% url 'perfil' %}" type="button" class="wizard-btn btn secondary active" data-target="1">Perfil</a>
-                    <a href="{% url 'inicio' %}" type="button" class="wizard-btn btn secondary" data-target="2">Reportes</a>
-                    <a href="{% url 'historial' %}" type="button" class="wizard-btn btn secondary" data-target="3">Historial</a>
+                    <a href="{% url 'perfil' %}" class="wizard-btn btn secondary active" data-target="1">
+                        Perfil
+                    </a>
+
+                    <a href="{% url 'inicio' %}" class="wizard-btn btn secondary" data-target="2">
+                        Reportes
+                    </a>
+
+                    <a href="{% url 'historial' %}" class="wizard-btn btn secondary" data-target="3">
+                        Historial
+                    </a>
                 </div>
 
-                <form id="profile-form"  method="post" novalidate>
+                <form id="profile-form" method="post">
                     {% csrf_token %}
-                
+
+                    {% if mensaje %}
+                        <div class="form-success" role="alert">
+                            {{ mensaje }}
+                        </div>
+                    {% endif %}
+
+                    {% if error %}
+                        <div class="form-error" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
                     <div class="step-panel active" data-step="1">
                         <div class="form-row">
 
                             <div class="form-group">
-                                <label for="display-name">Nombre</label>
-                                <input type="text"  name="nombres" value="{{ usuario.nombres }}" required>
+                                <label for="nombres">Nombre</label>
+                                <input
+                                    type="text"
+                                    id="nombres"
+                                    name="nombres"
+                                    value="{{ datos_formulario.nombres|default:usuario.nombres }}"
+                                    maxlength="100"
+                                    required
+                                >
                             </div>
 
                             <div class="form-group">
-                                <label for="display-name">Apellido</label>
-                                <input type="text"  name="apellidos" value="{{ usuario.apellidos }}" required>
+                                <label for="apellidos">Apellido</label>
+                                <input
+                                    type="text"
+                                    id="apellidos"
+                                    name="apellidos"
+                                    value="{{ datos_formulario.apellidos|default:usuario.apellidos }}"
+                                    maxlength="100"
+                                    required
+                                >
                             </div>
 
                             <div class="form-group">
-                                <label for="display-name">Nombre de usuario</label>
-                                <input type="text"  name="nombre_usuario" value="{{ usuario.nombre_usuario }}" required>
+                                <label for="nombre_usuario">Nombre de usuario</label>
+                                <input
+                                    type="text"
+                                    id="nombre_usuario"
+                                    name="nombre_usuario"
+                                    value="{{ datos_formulario.nombre_usuario|default:usuario.nombre_usuario }}"
+                                    maxlength="50"
+                                    required
+                                >
                             </div>
 
                             <div class="form-group">
-                                <label for="display-name">Correo</label>
-                                <input type="email"  name="email" value="{{ usuario.email }}" required>
+                                <label for="email">Correo</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value="{{ datos_formulario.email|default:usuario.email }}"
+                                    maxlength="100"
+                                    required
+                                >
                             </div>
 
                             <div class="form-group">
-                                <label for="display-name">Telefono</label>
-                                <input type="text"  name="numero_tel" value="{{ usuario.numero_tel }}" required>
+                                <label for="numero_tel">Teléfono</label>
+                                <input
+                                    type="tel"
+                                    id="numero_tel"
+                                    name="numero_tel"
+                                    value="{{ datos_formulario.numero_tel|default:usuario.numero_tel }}"
+                                    maxlength="20"
+                                    required
+                                >
                             </div>
-
 
                         </div>
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Foto de perfil</label>
+
                                 <div style="display:flex; align-items:center; gap:.75rem;">
                                     <div class="avatar large" id="profile-avatar">JD</div>
+
                                     <label class="file-upload" for="upload-photo">
                                         <i class="fa-solid fa-cloud-arrow-up"></i>
                                         <span>Cambiar foto</span>
-                                        <input type="file" id="upload-photo" accept="image/*" hidden>
+
+                                        <input
+                                            type="file"
+                                            id="upload-photo"
+                                            accept="image/*"
+                                            hidden
+                                        >
                                     </label>
                                 </div>
                             </div>
+
                             <div class="form-group">
-                                <label for="display-name">Fecha de nacimiento</label>
-                                <input type="date"name="fecha_nacimiento"value="{{ usuario.fecha_nacimiento|date:'Y-m-d' }}"required>
+                                <label for="fecha_nacimiento">Fecha de nacimiento</label>
+                                <input
+                                    type="date"
+                                    id="fecha_nacimiento"
+                                    name="fecha_nacimiento"
+                                    value="{% if datos_formulario.fecha_nacimiento %}{{ datos_formulario.fecha_nacimiento }}{% else %}{{ usuario.fecha_nacimiento|date:'Y-m-d' }}{% endif %}"
+                                    required
+                                >
                             </div>
                         </div>
                     </div>
 
                     <div class="step-panel" data-step="2">
                         <div class="summary-card">
-                            <div class="summary-item"><span>Total equipos reportados:</span><span id="total-reports">0</span><!-- Conectar con BD: total equipos reportados --></div>
-                            <div class="summary-item"><span>Laptops:</span><span id="laptop-reports">0</span><!-- Conectar con BD: total laptops reportadas --></div>
-                            <div class="summary-item"><span>PC:</span><span id="pc-reports">0</span><!-- Conectar con BD: total PC reportadas --></div>
-                            <div class="summary-item"><span>Pantallas:</span><span id="monitor-reports">0</span><!-- Conectar con BD: total pantallas reportadas --></div>
-                            <div class="summary-item"><span>TV:</span><span id="tv-reports">0</span><!-- Conectar con BD: total TV reportadas --></div>
+                            <div class="summary-item">
+                                <span>Total equipos reportados:</span>
+                                <span id="total-reports">0</span>
+                            </div>
+
+                            <div class="summary-item">
+                                <span>Laptops:</span>
+                                <span id="laptop-reports">0</span>
+                            </div>
+
+                            <div class="summary-item">
+                                <span>PC:</span>
+                                <span id="pc-reports">0</span>
+                            </div>
+
+                            <div class="summary-item">
+                                <span>Pantallas:</span>
+                                <span id="monitor-reports">0</span>
+                            </div>
+
+                            <div class="summary-item">
+                                <span>TV:</span>
+                                <span id="tv-reports">0</span>
+                            </div>
                         </div>
                     </div>
 
                     <div class="step-panel" data-step="3">
                         <h3 style="margin-top:0;">Últimos reportes</h3>
-                        <div class="history-list" id="history-list"><!-- Conectar con BD: últimos 3 reportes -->
+
+                        <div class="history-list" id="history-list">
                             <div class="history-item">
                                 <div><strong>#00123</strong></div>
                                 <div>Equipo: Laptop</div>
                                 <div>Estado: Pendiente</div>
                             </div>
+
                             <div class="history-item">
                                 <div><strong>#00112</strong></div>
                                 <div>Equipo: PC</div>
                                 <div>Estado: Revisión</div>
                             </div>
+
                             <div class="history-item">
                                 <div><strong>#00100</strong></div>
                                 <div>Equipo: Pantalla</div>
                                 <div>Estado: Completado</div>
                             </div>
                         </div>
+
                         <div style="margin-top:1rem; text-align:right;">
-                            <a href="{% url 'historial' %}" class="btn secondary">Ver más</a>
+                            <a href="{% url 'historial' %}" class="btn secondary">
+                                Ver más
+                            </a>
                         </div>
                     </div>
 
-                    <div class="form-error" id="form-error"></div>
                     <div class="form-actions">
-                        <button type="submit" id="save-button" class="btn primary">Guardar cambios</button>
+                        <button type="submit" id="save-button" class="btn primary">
+                            Guardar cambios
+                        </button>
                     </div>
                 </form>
             </section>
@@ -158,6 +272,5 @@
     </div>
 
     <script src="{% static 'js/perfil.js' %}"></script>
-
 </body>
 </html>
